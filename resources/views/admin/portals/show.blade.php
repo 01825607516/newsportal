@@ -1,12 +1,37 @@
 @extends('layouts.admin')
 @section('title', $portal->portal_name . ' · Admin')
+@section('page_title', 'Portal details')
 @section('content')
-<a href="{{ route('admin.portals.index') }}" class="fs-9">&larr; All portals</a>
-<div class="d-flex flex-wrap align-items-center gap-3 my-3">
-  <h3 class="mb-0">{{ $portal->portal_name }}</h3>
-  <span class="badge badge-phoenix badge-phoenix-{{ $portal->isActive() ? 'success' : 'danger' }}">{{ $portal->status }}</span>
+@php($stateBadge = ['active' => 'success', 'grace' => 'warning', 'expired' => 'danger'][$info['state']] ?? 'secondary')
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+  <div>
+    <a href="{{ route('admin.portals.index') }}" class="fs-9">&larr; All portals</a>
+    <h3 class="mb-1 mt-1">{{ $portal->portal_name }}</h3>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+      <span class="badge badge-phoenix badge-phoenix-{{ $portal->isActive() ? 'success' : 'danger' }}">{{ $portal->status }}</span>
+      @if ($info['subscription'])
+        <span class="badge badge-phoenix badge-phoenix-{{ $stateBadge }}">{{ $info['subscription']->package->name }} · {{ $info['state'] }}</span>
+      @endif
+      <span class="fs-9 text-body-tertiary">{{ $portal->editor_mobile }} · {{ $portal->database_name ?: 'no database' }}</span>
+    </div>
+  </div>
+  <form method="POST" action="{{ route('admin.portals.toggle', $portal) }}"
+        @if ($portal->isActive()) onsubmit="return confirm('Suspend this portal? The editor will be blocked from logging in.')" @endif>
+    @csrf
+    <button class="btn btn-{{ $portal->isActive() ? 'warning' : 'success' }}" type="submit">{{ $portal->isActive() ? 'Suspend portal' : 'Activate portal' }}</button>
+  </form>
 </div>
 
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item"><a class="nav-link {{ $tab === 'overview' ? 'active' : '' }}" href="{{ route('admin.portals.show', [$portal, 'tab' => 'overview']) }}">Overview</a></li>
+  <li class="nav-item"><a class="nav-link {{ $tab === 'billing' ? 'active' : '' }}" href="{{ route('admin.portals.show', [$portal, 'tab' => 'billing']) }}">
+    Billing @if ($info['due_months'] > 0)<span class="badge badge-phoenix badge-phoenix-warning ms-1">{{ $info['due_months'] }} due</span>@endif</a></li>
+  <li class="nav-item"><a class="nav-link {{ $tab === 'activity' ? 'active' : '' }}" href="{{ route('admin.portals.show', [$portal, 'tab' => 'activity']) }}">
+    Activity @if (count($alerts))<span class="badge badge-phoenix badge-phoenix-danger ms-1">{{ count($alerts) }}</span>@endif</a></li>
+</ul>
+
+@if ($tab === 'overview')
 <div class="row g-4">
   <div class="col-lg-7">
     <div class="card"><div class="card-body">
@@ -34,7 +59,7 @@
     <div class="card mb-4"><div class="card-body">
       <h5 class="mb-3">Tenant database</h5>
       <dl class="row mb-3">
-        <dt class="col-5">Database</dt><dd class="col-7">{{ $portal->database_name ? $portal->database_name : '—' }}</dd>
+        <dt class="col-5">Database</dt><dd class="col-7">{{ $portal->database_name ?: '—' }}</dd>
         <dt class="col-5">Provisioned</dt><dd class="col-7">{{ $portal->provisioned_at?->format('d M Y H:i') ?? 'No' }}</dd>
         <dt class="col-5">Tables</dt><dd class="col-7">{{ $tableCount ?? '—' }}</dd>
         <dt class="col-5">Created</dt><dd class="col-7">{{ $portal->created_at->format('d M Y H:i') }}</dd>
@@ -48,12 +73,8 @@
     </div></div>
 
     <div class="card border-danger"><div class="card-body">
-      <h5 class="mb-3">Access control</h5>
-      <form method="POST" action="{{ route('admin.portals.toggle', $portal) }}" class="mb-3">@csrf
-        <button class="btn btn-{{ $portal->isActive() ? 'warning' : 'success' }}" type="submit">
-          {{ $portal->isActive() ? 'Suspend portal (block login)' : 'Activate portal' }}
-        </button>
-      </form>
+      <h5 class="mb-2 text-danger">Danger zone</h5>
+      <p class="fs-9 text-body-tertiary">Deleting removes the portal and drops its tenant database. This cannot be undone.</p>
       <form method="POST" action="{{ route('admin.portals.destroy', $portal) }}"
             onsubmit="return confirm('This permanently deletes the portal AND its database. Continue?')">
         @csrf @method('DELETE')
@@ -62,5 +83,47 @@
     </div></div>
   </div>
 </div>
-@include('admin.portals._billing')
+
+@elseif ($tab === 'billing')
+  @include('admin.portals._billing')
+
+@else
+  @include('admin.partials._alerts', ['alerts' => $alerts, 'portal' => $portal])
+
+  <div class="row g-3 mb-4">
+    @foreach ([['Requests', $summary['requests']], ['Errors', $summary['errors']], ['Unique IPs', $summary['ips']], ['DB writes', $summary['writes']], ['Avg response (ms)', $summary['avg_ms']]] as [$label, $value])
+      <div class="col-6 col-xl"><div class="card"><div class="card-body py-3">
+        <div class="stat-label">{{ $label }}</div><div class="stat-value">{{ number_format($value) }}</div>
+      </div></div></div>
+    @endforeach
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+      <h6 class="mb-3">Most used endpoints</h6>
+      <table class="table table-sm mb-0">
+        <thead><tr><th>Path</th><th>Hits</th><th>Errors</th></tr></thead>
+        <tbody>
+        @forelse ($summary['top_paths'] as $row)
+          <tr><td class="path-cell">{{ $row->path }}</td><td>{{ $row->hits }}</td><td>{{ $row->errors }}</td></tr>
+        @empty<tr><td colspan="3" class="text-body-tertiary">No requests in this range.</td></tr>@endforelse
+        </tbody>
+      </table>
+    </div></div></div>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-body">
+      <h6 class="mb-3">IP addresses</h6>
+      <table class="table table-sm mb-0">
+        <thead><tr><th>IP</th><th>Hits</th><th>Last seen</th></tr></thead>
+        <tbody>
+        @forelse ($summary['top_ips'] as $row)
+          <tr><td>{{ $row->ip }}</td><td>{{ $row->hits }}</td><td class="fs-9">{{ \Illuminate\Support\Carbon::parse($row->last_seen)->format('d M H:i') }}</td></tr>
+        @empty<tr><td colspan="3" class="text-body-tertiary">No requests in this range.</td></tr>@endforelse
+        </tbody>
+      </table>
+    </div></div></div>
+  </div>
+
+  @include('admin.partials._activity_filters', ['ranges' => $ranges, 'hidden' => ['tab' => 'activity']])
+  @include('admin.partials._activity_table', ['logs' => $logs, 'showPortal' => false])
+@endif
 @endsection

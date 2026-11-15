@@ -21,4 +21,13 @@ return [
     // Schema (and optionally sample data) imported into every new tenant DB
     'schema_file' => database_path('tenant/schema.sql'),
     'import_sample_data' => (bool) env('TENANT_IMPORT_SAMPLE_DATA', false),
+
+    // Thresholds used to flag suspicious portals in the admin panel
+    'monitor' => [
+        'requests_per_15min' => (int) env('MONITOR_REQUESTS_15MIN', 300),
+        'writes_per_15min' => (int) env('MONITOR_WRITES_15MIN', 1000),
+        'errors_per_hour' => (int) env('MONITOR_ERRORS_HOUR', 30),
+        'ips_per_hour' => (int) env('MONITOR_IPS_HOUR', 4),
+        'blocked_logins_per_hour' => (int) env('MONITOR_BLOCKED_LOGINS_HOUR', 5),
+    ],
 ];

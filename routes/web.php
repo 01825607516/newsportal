@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BillingController as AdminBillingController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\PortalController as AdminPortalController;
 use App\Http\Controllers\PortalAuthController;
 use Illuminate\Support\Facades\Route;
@@ -11,7 +13,7 @@ Route::get('/login', [PortalAuthController::class, 'showLogin'])->name('portal.l
 Route::post('/login', [PortalAuthController::class, 'login'])->name('portal.login.submit');
 Route::post('/logout', [PortalAuthController::class, 'logout'])->name('portal.logout');
 
-Route::middleware('portal.auth')->group(function () {
+Route::middleware(['portal.auth', 'portal.log'])->group(function () {
     Route::view('/', 'dashboard')->name('dashboard');
     Route::view('/dashboard/project-management', 'dashboard')->name('project-management');
 });
@@ -24,7 +26,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::middleware('admin.auth')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
-        Route::get('/', fn () => redirect()->route('admin.portals.index'))->name('home');
+        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity.index');
         Route::get('/portals', [AdminPortalController::class, 'index'])->name('portals.index');
         Route::get('/portals/{portal}', [AdminPortalController::class, 'show'])->name('portals.show');
         Route::put('/portals/{portal}', [AdminPortalController::class, 'update'])->name('portals.update');

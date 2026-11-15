@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Package;
 use App\Models\Portal;
-use App\Services\TenantManager;
+use App\Models\PortalActivity;
+use App\Services\ActivityMonitor;
 use App\Services\SubscriptionService;
+use App\Services\TenantManager;
 use App\Services\TenantProvisioner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,28 +44,49 @@ class PortalController extends Controller
         return view('admin.portals.index', compact('portals', 'stats', 'q', 'status'));
     }
 
-    public function show(Portal $portal, SubscriptionService $subs)
+    public function show(Request $request, Portal $portal, SubscriptionService $subs, ActivityMonitor $monitor)
     {
-        $tableCount = null;
-        $dbError = null;
+        $tab = in_array($request->query('tab'), ['overview', 'billing', 'activity'], true) ? $request->query('tab') : 'overview';
 
-        if ($portal->isProvisioned()) {
-            try {
-                TenantManager::connect($portal);
-                $tableCount = count(DB::connection('tenant')->select('SHOW TABLES'));
-            } catch (Throwable $e) {
-                $dbError = $e->getMessage();
+        $data = [
+            'portal' => $portal,
+            'tab' => $tab,
+            'info' => $subs->info($portal),
+            'alerts' => $monitor->alerts($portal),
+        ];
+
+        if ($tab === 'overview') {
+            $data['tableCount'] = null;
+            $data['dbError'] = null;
+
+            if ($portal->isProvisioned()) {
+                try {
+                    TenantManager::connect($portal);
+                    $data['tableCount'] = count(DB::connection('tenant')->select('SHOW TABLES'));
+                } catch (Throwable $e) {
+                    $data['dbError'] = $e->getMessage();
+                }
             }
         }
 
-        $info = $subs->info($portal);
-        $packages = Package::where('active', true)->orderBy('price')->get();
-        $payments = $portal->payments()->with('package')->latest('paid_at')->get();
-        $charges = $portal->charges()->latest()->get();
-        $extras = $subs->extrasBreakdown($portal);
-        $quotes = $packages->mapWithKeys(fn ($p) => [$p->id => $subs->quote($portal, $p)]);
+        if ($tab === 'billing') {
+            $packages = Package::where('active', true)->orderBy('price')->get();
+            $data['packages'] = $packages;
+            $data['payments'] = $portal->payments()->with('package')->latest('paid_at')->get();
+            $data['charges'] = $portal->charges()->latest()->get();
+            $data['extras'] = $subs->extrasBreakdown($portal);
+            $data['quotes'] = $packages->mapWithKeys(fn ($p) => [$p->id => $subs->quote($portal, $p)]);
+        }
 
-        return view('admin.portals.show', compact('portal', 'tableCount', 'dbError', 'info', 'packages', 'payments', 'charges', 'extras', 'quotes'));
+        if ($tab === 'activity') {
+            $data['summary'] = $monitor->summary($portal, $monitor->since($request->query('range')));
+            $data['logs'] = $monitor->filtered(PortalActivity::where('portal_id', $portal->id), $request)
+                ->orderByDesc('created_at')->orderByDesc('id')
+                ->paginate(25)->withQueryString();
+            $data['ranges'] = ActivityMonitor::RANGES;
+        }
+
+        return view('admin.portals.show', $data);
     }
 
     public function update(Request $request, Portal $portal)

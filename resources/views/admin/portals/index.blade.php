@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 @section('title', 'Portals · Admin')
+@section('page_title', 'Portals')
 @section('content')
 <div class="row g-3 mb-4">
   @foreach ([['Total portals', $stats['total']], ['Active', $stats['active']], ['Suspended', $stats['suspended']], ['DB not ready', $stats['unprovisioned']]] as [$label, $value])
@@ -60,5 +61,5 @@
     </table>
   </div>
 </div>
-<div class="mt-3">{{ $portals->links() }}</div>
+<div class="mt-3">{{ $portals->links('pagination::bootstrap-5') }}</div>
 @endsection
