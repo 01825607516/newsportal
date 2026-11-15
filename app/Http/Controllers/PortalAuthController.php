@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Portal;
+use App\Services\ActivityMonitor;
 use App\Services\SubscriptionService;
 use App\Services\TenantProvisioner;
 use Illuminate\Http\Request;
@@ -19,7 +20,7 @@ class PortalAuthController extends Controller
         return view('portal.login');
     }
 
-    public function login(Request $request, TenantProvisioner $provisioner, SubscriptionService $subs)
+    public function login(Request $request, TenantProvisioner $provisioner, SubscriptionService $subs, ActivityMonitor $monitor)
     {
         $data = $request->validate([
             'portal_name' => ['required', 'string', 'max:100'],
@@ -37,6 +38,7 @@ class PortalAuthController extends Controller
         $portal = Portal::where('portal_name', $name)->where('editor_mobile', $mobile)->first();
 
         if ($portal && !$portal->isActive()) {
+            $monitor->log($request, $portal, 'login_blocked', 403);
             return back()->withInput()->withErrors([
                 'editor_mobile' => 'This portal has been suspended. Please contact the administrator.',
             ]);
@@ -54,6 +56,7 @@ class PortalAuthController extends Controller
         $subs->ensureTrial($portal);
 
         if (!$subs->isUsable($portal)) {
+            $monitor->log($request, $portal, 'login_blocked', 403);
             return back()->withInput()->withErrors([
                 'editor_mobile' => 'Your subscription has expired. Please contact the administrator to renew.',
             ]);
@@ -82,6 +85,7 @@ class PortalAuthController extends Controller
 
         $request->session()->regenerate();
         $request->session()->put('portal_id', $portal->id);
+        $monitor->log($request, $portal, 'login', 302);
 
         return redirect()->route('dashboard');
     }

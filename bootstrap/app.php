@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdminAuthenticated;
 use App\Http\Middleware\EnsurePortalAuthenticated;
+use App\Http\Middleware\LogPortalActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,6 +13,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'portal.auth' => EnsurePortalAuthenticated::class,
             'admin.auth' => EnsureAdminAuthenticated::class,
+            'portal.log' => LogPortalActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

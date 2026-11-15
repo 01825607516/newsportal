@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 @section('title', 'Packages · Admin')
+@section('page_title', 'Packages')
 @section('content')
-<h3 class="mb-1">Packages</h3>
 <p class="text-body-tertiary">
   The charge is <b>per month</b>. Set <b>Term = 12</b> for a yearly plan: the portal commits for 12 months but pays month by month
   (or several months at once). A skipped month stays due and is collected with the next payment.

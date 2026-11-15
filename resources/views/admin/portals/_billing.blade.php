@@ -3,8 +3,6 @@
   $sub = $info['subscription'];
   $defaultId = $sub?->package_id ?? optional($packages->firstWhere('slug', 'package-1'))->id;
 @endphp
-<hr class="my-5">
-<h4 class="mb-3">Subscription &amp; billing</h4>
 
 <div class="row g-4">
   <div class="col-lg-4">

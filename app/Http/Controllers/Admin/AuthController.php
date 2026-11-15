@@ -12,7 +12,7 @@ class AuthController extends Controller
     public function showLogin(Request $request)
     {
         return $request->session()->has('admin_id')
-            ? redirect()->route('admin.portals.index')
+            ? redirect()->route('admin.dashboard')
             : view('admin.login');
     }
 
@@ -33,7 +33,7 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $request->session()->put('admin_id', $admin->id);
 
-        return redirect()->route('admin.portals.index');
+        return redirect()->route('admin.dashboard');
     }
 
     public function logout(Request $request)
