@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Portal extends Model
 {
@@ -23,6 +24,21 @@ class Portal extends Model
     {
         $digits = preg_replace('/[\s\-()]/', '', $mobile);
         return preg_replace('/^(\+?88)/', '', $digits);
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function charges(): HasMany
+    {
+        return $this->hasMany(PortalCharge::class);
     }
 
     public function isProvisioned(): bool

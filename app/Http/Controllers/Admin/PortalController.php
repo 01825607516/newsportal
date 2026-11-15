@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Package;
 use App\Models\Portal;
 use App\Services\TenantManager;
+use App\Services\SubscriptionService;
 use App\Services\TenantProvisioner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +42,7 @@ class PortalController extends Controller
         return view('admin.portals.index', compact('portals', 'stats', 'q', 'status'));
     }
 
-    public function show(Portal $portal)
+    public function show(Portal $portal, SubscriptionService $subs)
     {
         $tableCount = null;
         $dbError = null;
@@ -54,7 +56,13 @@ class PortalController extends Controller
             }
         }
 
-        return view('admin.portals.show', compact('portal', 'tableCount', 'dbError'));
+        $info = $subs->info($portal);
+        $packages = Package::where('active', true)->orderBy('price')->get();
+        $payments = $portal->payments()->with('package')->latest('paid_at')->get();
+        $charges = $portal->charges()->latest()->get();
+        $extras = $subs->extrasDue($portal);
+
+        return view('admin.portals.show', compact('portal', 'tableCount', 'dbError', 'info', 'packages', 'payments', 'charges', 'extras'));
     }
 
     public function update(Request $request, Portal $portal)

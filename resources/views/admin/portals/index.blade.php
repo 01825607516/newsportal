@@ -28,7 +28,7 @@
   <div class="table-responsive">
     <table class="table table-hover mb-0 align-middle">
       <thead><tr>
-        <th>#</th><th>Portal</th><th>Editor</th><th>Mobile</th><th>Database</th><th>Status</th><th>Last login</th><th></th>
+        <th>#</th><th>Portal</th><th>Editor</th><th>Mobile</th><th>Database</th><th>Plan</th><th>Status</th><th>Last login</th><th></th>
       </tr></thead>
       <tbody>
       @forelse ($portals as $p)
@@ -41,12 +41,20 @@
             @if ($p->isProvisioned())<code>{{ $p->database_name }}</code>
             @else<span class="badge badge-phoenix badge-phoenix-warning">not ready</span>@endif
           </td>
+          @php($sub = app(\App\Services\SubscriptionService::class)->info($p))
+          <td>
+            @if ($sub['subscription'])
+              <div>{{ $sub['subscription']->package->name }}</div>
+              <span class="badge badge-phoenix badge-phoenix-{{ ['active' => 'success', 'grace' => 'warning', 'expired' => 'danger'][$sub['state']] ?? 'secondary' }}">{{ $sub['state'] }}</span>
+              <span class="fs-9 text-body-tertiary">till {{ $sub['subscription']->ends_at->format('d M') }}</span>
+            @else<span class="text-body-tertiary">—</span>@endif
+          </td>
           <td><span class="badge badge-phoenix badge-phoenix-{{ $p->isActive() ? 'success' : 'danger' }}">{{ $p->status }}</span></td>
           <td class="fs-9">{{ $p->last_login_at?->diffForHumans() ?? 'never' }}</td>
           <td class="text-end"><a class="btn btn-sm btn-phoenix-primary" href="{{ route('admin.portals.show', $p) }}">Manage</a></td>
         </tr>
       @empty
-        <tr><td colspan="8" class="text-center text-body-tertiary py-5">No portals found.</td></tr>
+        <tr><td colspan="9" class="text-center text-body-tertiary py-5">No portals found.</td></tr>
       @endforelse
       </tbody>
     </table>

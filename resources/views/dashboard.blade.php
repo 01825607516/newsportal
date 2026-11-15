@@ -36,6 +36,11 @@
 <body>
     <div style="position:fixed;top:8px;right:140px;z-index:2000;display:flex;gap:8px;align-items:center;font:600 13px 'Nunito Sans',sans-serif">
         <span>{{ $currentPortal->portal_name ?? '' }}</span>
+        @if (($subscriptionInfo['state'] ?? null) === 'grace')
+            <span style="background:#fde8e8;color:#c0392b;padding:2px 8px;border-radius:6px">Subscription overdue – {{ $subscriptionInfo['grace_days_left'] }} day(s) left, then access stops</span>
+        @elseif (($subscriptionInfo['state'] ?? null) === 'active')
+            <span style="background:#eef3ff;color:#3874ff;padding:2px 8px;border-radius:6px">{{ $subscriptionInfo['subscription']->package->name }} · {{ $subscriptionInfo['days_left'] }} day(s) left</span>
+        @endif
         <form method="POST" action="{{ route('portal.logout') }}">@csrf<button type="submit" style="border:1px solid #ccd;background:#fff;border-radius:6px;padding:2px 10px">Logout</button></form>
     </div>
     <div id="app"></div>

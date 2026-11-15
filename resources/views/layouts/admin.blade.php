@@ -3,6 +3,8 @@
 <nav class="navbar bg-body-emphasis border-bottom px-4 py-3">
   <a class="navbar-brand fw-bold text-body-emphasis" href="{{ route('admin.portals.index') }}">News Portal · Admin</a>
   <div class="d-flex align-items-center gap-3">
+    <a class="fs-9 fw-semibold" href="{{ route('admin.portals.index') }}">Portals</a>
+    <a class="fs-9 fw-semibold" href="{{ route('admin.packages.index') }}">Packages</a>
     <span class="text-body-tertiary fs-9">{{ $currentAdmin->name }}</span>
     <form method="POST" action="{{ route('admin.logout') }}">@csrf
       <button class="btn btn-sm btn-phoenix-secondary" type="submit">Logout</button>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Portal;
+use App\Services\SubscriptionService;
 use App\Services\TenantProvisioner;
 use Illuminate\Http\Request;
 use Throwable;
@@ -18,7 +19,7 @@ class PortalAuthController extends Controller
         return view('portal.login');
     }
 
-    public function login(Request $request, TenantProvisioner $provisioner)
+    public function login(Request $request, TenantProvisioner $provisioner, SubscriptionService $subs)
     {
         $data = $request->validate([
             'portal_name' => ['required', 'string', 'max:100'],
@@ -46,6 +47,15 @@ class PortalAuthController extends Controller
                 'portal_name' => $name,
                 'editor_mobile' => $mobile,
                 'status' => 'active',
+            ]);
+        }
+
+        // New portals get the one-time 7 day trial automatically
+        $subs->ensureTrial($portal);
+
+        if (!$subs->isUsable($portal)) {
+            return back()->withInput()->withErrors([
+                'editor_mobile' => 'Your subscription has expired. Please contact the administrator to renew.',
             ]);
         }
 

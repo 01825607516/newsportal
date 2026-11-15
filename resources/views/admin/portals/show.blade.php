@@ -62,4 +62,5 @@
     </div></div>
   </div>
 </div>
+@include('admin.portals._billing')
 @endsection

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Portal;
+use App\Services\SubscriptionService;
 use App\Services\TenantManager;
 use Closure;
 use Illuminate\Http\Request;
@@ -19,6 +20,16 @@ class EnsurePortalAuthenticated
             return redirect()->route('portal.login')
                 ->withErrors(['editor_mobile' => 'Session expired or portal is not active.']);
         }
+
+        $info = app(SubscriptionService::class)->info($portal);
+
+        if (!in_array($info['state'], ['active', 'grace'], true)) {
+            $request->session()->forget('portal_id');
+            return redirect()->route('portal.login')
+                ->withErrors(['editor_mobile' => 'Your subscription has expired. Please contact the administrator to renew.']);
+        }
+
+        view()->share('subscriptionInfo', $info);
 
         // From here on, DB::connection('tenant') is this portal's own database.
         TenantManager::connect($portal);
