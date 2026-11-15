@@ -4,7 +4,7 @@ import path from 'node:path'
 
 const repositoryRoot = fileURLToPath(new URL('../', import.meta.url))
 const appRoot = path.join(repositoryRoot, 'v1.23.0')
-const outputRoot = path.join(appRoot, 'dist')
+const outputRoot = path.join(repositoryRoot, 'public')
 
 await mkdir(outputRoot, { recursive: true })
 await Promise.all(['assets', 'vendors'].map((folder) =>

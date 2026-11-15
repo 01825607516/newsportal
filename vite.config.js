@@ -1,22 +1,16 @@
-import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vite'
+import laravel from 'laravel-vite-plugin'
 import vue from '@vitejs/plugin-vue'
 
-const appRoot = fileURLToPath(new URL('./v1.23.0/', import.meta.url))
-
 export default defineConfig({
-  root: appRoot,
-  base: './',
-  publicDir: false,
-  plugins: [vue()],
-  server: {
-    open: '/dashboard/project-management-vue.html',
-  },
+  plugins: [
+    laravel({
+      input: ['v1.23.0/src/project-management.js'],
+      refresh: true,
+    }),
+    vue(),
+  ],
   build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    rollupOptions: {
-      input: fileURLToPath(new URL('./v1.23.0/dashboard/project-management-vue.html', import.meta.url)),
-    },
+    manifest: 'manifest.json',
   },
 })
