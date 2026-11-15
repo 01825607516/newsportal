@@ -34,6 +34,10 @@
     @vite('v1.23.0/src/project-management.js')
 </head>
 <body>
+    <div style="position:fixed;top:8px;right:140px;z-index:2000;display:flex;gap:8px;align-items:center;font:600 13px 'Nunito Sans',sans-serif">
+        <span>{{ $currentPortal->portal_name ?? '' }}</span>
+        <form method="POST" action="{{ route('portal.logout') }}">@csrf<button type="submit" style="border:1px solid #ccd;background:#fff;border-radius:6px;padding:2px 10px">Logout</button></form>
+    </div>
     <div id="app"></div>
 </body>
 </html>
