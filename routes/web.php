@@ -38,6 +38,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::delete('/portals/{portal}/charges/{charge}', [AdminBillingController::class, 'removeCharge'])->name('portals.charges.destroy');
 
         Route::get('/packages', [AdminBillingController::class, 'packages'])->name('packages.index');
+        Route::post('/packages', [AdminBillingController::class, 'storePackage'])->name('packages.store');
         Route::put('/packages/{package}', [AdminBillingController::class, 'updatePackage'])->name('packages.update');
     });
 });

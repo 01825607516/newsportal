@@ -60,9 +60,10 @@ class PortalController extends Controller
         $packages = Package::where('active', true)->orderBy('price')->get();
         $payments = $portal->payments()->with('package')->latest('paid_at')->get();
         $charges = $portal->charges()->latest()->get();
-        $extras = $subs->extrasDue($portal);
+        $extras = $subs->extrasBreakdown($portal);
+        $quotes = $packages->mapWithKeys(fn ($p) => [$p->id => $subs->quote($portal, $p)]);
 
-        return view('admin.portals.show', compact('portal', 'tableCount', 'dbError', 'info', 'packages', 'payments', 'charges', 'extras'));
+        return view('admin.portals.show', compact('portal', 'tableCount', 'dbError', 'info', 'packages', 'payments', 'charges', 'extras', 'quotes'));
     }
 
     public function update(Request $request, Portal $portal)
