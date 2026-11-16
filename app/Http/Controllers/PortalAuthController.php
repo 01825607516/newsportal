@@ -28,7 +28,7 @@ class PortalAuthController extends Controller
             'portal_reg_no' => ['nullable', 'string', 'max:100'],
             'editor_name' => ['nullable', 'string', 'max:100'],
             'editor_email' => ['nullable', 'email', 'max:150'],
-            'editor_mobile' => ['required', 'regex:' . Portal::MOBILE_REGEX],
+            'editor_mobile' => ['required', 'regex:' . Portal::mobileRegex()],
             'password' => ['required', 'string', 'min:6', 'max:100'],
             'password_confirmation' => ['nullable', 'string'],
         ], [

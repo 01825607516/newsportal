@@ -20,6 +20,26 @@ return [
 
     // Schema (and optionally sample data) imported into every new tenant DB
     'schema_file' => database_path('tenant/schema.sql'),
+    // Views (re)created in every tenant DB on provision – idempotent (CREATE OR REPLACE VIEW)
+    'views_file' => database_path('tenant/views.sql'),
+    // Extra schema changes for tenant DBs: database/tenant/migrations/*.sql, applied once per
+    // tenant, in file-name order (see database/tenant/migrations/README.md).
+    'migrations_path' => database_path('tenant/migrations'),
+
+    // Class (with a seed($connection, $portal) method) that fills a brand new tenant database.
+    // Point this at your own class when this code is reused for another system.
+    'seeder' => \App\Services\TenantSeeder::class,
+
+    // Written into every tenant DB so a DB that belongs to ANOTHER installation (same
+    // tenant_<id> name on a shared MySQL server) is refused instead of silently reused.
+    // Defaults to a hash of APP_KEY. Better: also give each environment its own TENANT_DB_PREFIX.
+    'installation_id' => env('TENANT_INSTALLATION_ID') ?: substr(hash('sha256', (string) env('APP_KEY')), 0, 16),
+
+    'default_time_zone' => env('TENANT_DEFAULT_TIMEZONE', 'Asia/Dhaka'),
+
+    // Optional override of the mobile-number rule (leave empty for Bangladeshi numbers).
+    'mobile_regex' => env('PORTAL_MOBILE_REGEX'),
+
     'import_sample_data' => (bool) env('TENANT_IMPORT_SAMPLE_DATA', false),
 
     // Thresholds used to flag suspicious portals in the admin panel

@@ -18,3 +18,21 @@ php artisan serve
 Open `/` or `/dashboard/project-management`. For development, run `npm run dev` in one terminal and `php artisan serve` in another.
 
 Phoenix files remain under `v1.23.0/`; the build script copies `assets/` and `vendors/` into Laravel's public directory.
+
+## Multi-tenant database (one MySQL database per portal)
+
+On a portal's first login `TenantProvisioner` creates `<TENANT_DB_PREFIX><portal id>`, imports
+`database/tenant/schema.sql`, applies `database/tenant/migrations/*.sql`, (re)creates the views in
+`database/tenant/views.sql` and seeds the first rows via `App\Services\TenantSeeder`.
+
+| Task | How |
+| --- | --- |
+| Repair / create one tenant DB | Admin panel > portal > "Create / repair tenant database" |
+| Add or change a view | edit `database/tenant/views.sql` (use `CREATE OR REPLACE VIEW`), run `php artisan tenants:sync-views` |
+| Change a table | add a file to `database/tenant/migrations/`, run `php artisan tenants:migrate` |
+| Create an admin | `php artisan admin:create email password "Name"` |
+
+Reusing this for another system: replace `schema.sql` and `views.sql`, point `tenancy.seeder` to your
+own seeder class, and set a unique `TENANT_DB_PREFIX` per environment. The tenant DB user needs
+CREATE / DROP DATABASE and CREATE VIEW privileges. A tenant DB that is only half imported and
+holds no data is wiped and imported again; one that holds data is never touched automatically.

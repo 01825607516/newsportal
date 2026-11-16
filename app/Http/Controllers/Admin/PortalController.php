@@ -96,7 +96,7 @@ class PortalController extends Controller
             'portal_reg_no' => ['nullable', 'string', 'max:100'],
             'editor_name' => ['nullable', 'string', 'max:100'],
             'editor_email' => ['nullable', 'email', 'max:150'],
-            'editor_mobile' => ['required', 'regex:' . Portal::MOBILE_REGEX],
+            'editor_mobile' => ['required', 'regex:' . Portal::mobileRegex()],
         ]);
         $data['editor_mobile'] = Portal::normalizeMobile($data['editor_mobile']);
 

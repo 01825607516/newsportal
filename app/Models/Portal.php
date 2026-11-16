@@ -22,6 +22,11 @@ class Portal extends Model
 
     public const MOBILE_REGEX = '/^(?:\+?88)?01[3-9]\d{8}$/';
 
+    public static function mobileRegex(): string
+    {
+        return config('tenancy.mobile_regex') ?: self::MOBILE_REGEX;
+    }
+
     /** +8801712-345678 / 8801712345678 / 01712 345678  =>  01712345678 */
     public static function normalizeMobile(string $mobile): string
     {
