@@ -65,6 +65,32 @@
         border-bottom: 1px solid var(--phoenix-border-color);
       }
       .content .table code { color: var(--phoenix-body-color); background: transparent; }
+
+      /* Keep portal search and status controls aligned on wider screens. */
+      .portal-filters { margin-bottom: 1rem; }
+      .portal-filters .card-body {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(190px, 230px) auto auto;
+        align-items: center;
+        gap: 10px;
+        padding: 14px;
+      }
+      .portal-search,
+      .portal-status-filter { min-width: 0; }
+      .portal-filters .form-control,
+      .portal-filters .form-select,
+      .portal-filters .btn {
+        min-height: 44px;
+      }
+      .portal-filters .form-control,
+      .portal-filters .form-select { width: 100%; }
+      .portal-filters .btn { white-space: nowrap; }
+      @media (max-width: 575.98px) {
+        .portal-filters .card-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+        .portal-search,
+        .portal-status-filter { grid-column: 1 / -1; }
+        .portal-filters .btn { width: 100%; }
+      }
     </style>
 </head>
 <body>
