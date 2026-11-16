@@ -13,6 +13,12 @@ class EnsurePortalAuthenticated
     public function handle(Request $request, Closure $next)
     {
         $id = $request->session()->get('portal_id');
+
+        // A visitor who has not logged in yet is not an expired session.
+        if (!$id) {
+            return redirect()->route('portal.login');
+        }
+
         $portal = $id ? Portal::find($id) : null;
 
         if (!$portal || !$portal->isActive() || !$portal->isProvisioned()) {
