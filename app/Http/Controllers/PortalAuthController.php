@@ -7,6 +7,7 @@ use App\Services\ActivityMonitor;
 use App\Services\SubscriptionService;
 use App\Services\TenantProvisioner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Throwable;
 
 class PortalAuthController extends Controller
@@ -28,6 +29,8 @@ class PortalAuthController extends Controller
             'editor_name' => ['nullable', 'string', 'max:100'],
             'editor_email' => ['nullable', 'email', 'max:150'],
             'editor_mobile' => ['required', 'regex:' . Portal::MOBILE_REGEX],
+            'password' => ['required', 'string', 'min:6', 'max:100'],
+            'password_confirmation' => ['nullable', 'string'],
         ], [
             'editor_mobile.regex' => 'Enter a valid Bangladeshi mobile number (e.g. 017XXXXXXXX).',
         ]);
@@ -37,9 +40,26 @@ class PortalAuthController extends Controller
 
         $portal = Portal::where('portal_name', $name)->where('editor_mobile', $mobile)->first();
 
+        // Existing portal with a password: verify it.
+        if ($portal && $portal->password !== null && !Hash::check($data['password'], $portal->password)) {
+            $monitor->log($request, $portal, 'login_failed', 401);
+            return back()->withInput($request->except('password', 'password_confirmation'))->withErrors([
+                'password' => 'Incorrect password.',
+            ]);
+        }
+
+        // New portal, or an old portal that has no password yet: the password is being set now,
+        // so it must be confirmed.
+        $settingPassword = !$portal || $portal->password === null;
+        if ($settingPassword && ($data['password_confirmation'] ?? '') !== $data['password']) {
+            return back()->withInput($request->except('password', 'password_confirmation'))->withErrors([
+                'password_confirmation' => 'Password and confirm password do not match.',
+            ]);
+        }
+
         if ($portal && !$portal->isActive()) {
             $monitor->log($request, $portal, 'login_blocked', 403);
-            return back()->withInput()->withErrors([
+            return back()->withInput($request->except('password', 'password_confirmation'))->withErrors([
                 'editor_mobile' => 'This portal has been suspended. Please contact the administrator.',
             ]);
         }
@@ -48,8 +68,12 @@ class PortalAuthController extends Controller
             $portal = Portal::create([
                 'portal_name' => $name,
                 'editor_mobile' => $mobile,
+                'password' => $data['password'],
                 'status' => 'active',
             ]);
+        } elseif ($portal->password === null) {
+            $portal->password = $data['password'];
+            $portal->save();
         }
 
         // New portals get the one-time 7 day trial automatically
@@ -57,7 +81,7 @@ class PortalAuthController extends Controller
 
         if (!$subs->isUsable($portal)) {
             $monitor->log($request, $portal, 'login_blocked', 403);
-            return back()->withInput()->withErrors([
+            return back()->withInput($request->except('password', 'password_confirmation'))->withErrors([
                 'editor_mobile' => 'Your subscription has expired. Please contact the administrator to renew.',
             ]);
         }
@@ -74,7 +98,7 @@ class PortalAuthController extends Controller
             try {
                 $provisioner->provision($portal);
             } catch (Throwable $e) {
-                return back()->withInput()->withErrors([
+                return back()->withInput($request->except('password', 'password_confirmation'))->withErrors([
                     'portal_name' => 'Could not set up your portal database right now. Please try again or contact support.',
                 ]);
             }

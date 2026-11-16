@@ -31,6 +31,14 @@
     Activity @if (count($alerts))<span class="badge badge-phoenix badge-phoenix-danger ms-1">{{ count($alerts) }}</span>@endif</a></li>
 </ul>
 
+@php($pendingForPortal = $portal->graceRequests()->where('status', 'pending')->count() + $portal->purchaseRequests()->where('status', 'pending')->count())
+@if ($pendingForPortal > 0)
+  <div class="alert alert-subtle-info d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
+    <div>This portal has <b>{{ $pendingForPortal }}</b> pending request(s) (grace period / renewal).</div>
+    <a class="btn btn-sm btn-phoenix-primary" href="{{ route('admin.requests.index') }}">Review requests</a>
+  </div>
+@endif
+
 @if ($tab === 'overview')
 <div class="row g-4">
   <div class="col-lg-7">
@@ -65,8 +73,8 @@
         <dt class="col-5">Created</dt><dd class="col-7">{{ $portal->created_at->format('d M Y H:i') }}</dd>
         <dt class="col-5">Last login</dt><dd class="col-7">{{ $portal->last_login_at?->format('d M Y H:i') ?? 'never' }}</dd>
       </dl>
-      @if ($dbError)<div class="alert alert-warning fs-9">DB connection error: {{ $dbError }}</div>@endif
-      @if ($portal->provision_error)<div class="alert alert-warning fs-9">Last provisioning error: {{ $portal->provision_error }}</div>@endif
+      @if ($dbError)<div class="alert alert-subtle-warning fs-9">DB connection error: {{ $dbError }}</div>@endif
+      @if ($portal->provision_error)<div class="alert alert-subtle-warning fs-9">Last provisioning error: {{ $portal->provision_error }}</div>@endif
       <form method="POST" action="{{ route('admin.portals.provision', $portal) }}">@csrf
         <button class="btn btn-phoenix-secondary" type="submit">Create / repair tenant database</button>
       </form>

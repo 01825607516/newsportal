@@ -5,7 +5,9 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BillingController as AdminBillingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\PortalController as AdminPortalController;
+use App\Http\Controllers\Admin\RequestController as AdminRequestController;
 use App\Http\Controllers\PortalAuthController;
+use App\Http\Controllers\PortalBillingController;
 use Illuminate\Support\Facades\Route;
 
 // ---------- Portal (tenant) side ----------
@@ -14,8 +16,11 @@ Route::post('/login', [PortalAuthController::class, 'login'])->name('portal.logi
 Route::post('/logout', [PortalAuthController::class, 'logout'])->name('portal.logout');
 
 Route::middleware(['portal.auth', 'portal.log'])->group(function () {
-    Route::view('/', 'dashboard')->name('dashboard');
-    Route::view('/dashboard/project-management', 'dashboard')->name('project-management');
+    Route::get('/', [PortalBillingController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/project-management', [PortalBillingController::class, 'dashboard'])->name('project-management');
+
+    Route::post('/subscription/grace', [PortalBillingController::class, 'requestGrace'])->name('portal.grace.request');
+    Route::post('/subscription/purchase', [PortalBillingController::class, 'requestPurchase'])->name('portal.purchase.request');
 });
 
 // ---------- Admin panel ----------
@@ -39,6 +44,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/portals/{portal}/payments', [AdminBillingController::class, 'recordPayment'])->name('portals.payments.store');
         Route::post('/portals/{portal}/charges', [AdminBillingController::class, 'addCharge'])->name('portals.charges.store');
         Route::delete('/portals/{portal}/charges/{charge}', [AdminBillingController::class, 'removeCharge'])->name('portals.charges.destroy');
+
+        // Portal requests (grace period / renewal)
+        Route::get('/requests', [AdminRequestController::class, 'index'])->name('requests.index');
+        Route::post('/requests/grace/{graceRequest}/approve', [AdminRequestController::class, 'approveGrace'])->name('requests.grace.approve');
+        Route::post('/requests/grace/{graceRequest}/reject', [AdminRequestController::class, 'rejectGrace'])->name('requests.grace.reject');
+        Route::post('/requests/purchase/{purchaseRequest}/approve', [AdminRequestController::class, 'approvePurchase'])->name('requests.purchase.approve');
+        Route::post('/requests/purchase/{purchaseRequest}/reject', [AdminRequestController::class, 'rejectPurchase'])->name('requests.purchase.reject');
 
         Route::get('/packages', [AdminBillingController::class, 'packages'])->name('packages.index');
         Route::post('/packages', [AdminBillingController::class, 'storePackage'])->name('packages.store');

@@ -1,6 +1,6 @@
 {{-- vars: $alerts, $portal --}}
 @if (count($alerts))
-  <div class="alert alert-{{ collect($alerts)->contains('level', 'danger') ? 'danger' : 'warning' }} mb-3">
+  <div class="alert alert-subtle-{{ collect($alerts)->contains('level', 'danger') ? 'danger' : 'warning' }} mb-3">
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
       <div>
         <div class="fw-bold mb-1">Suspicious activity detected</div>
@@ -14,5 +14,5 @@
     </div>
   </div>
 @else
-  <div class="alert alert-success mb-3">No suspicious patterns detected in the last hour.</div>
+  <div class="alert alert-subtle-success mb-3">No suspicious patterns detected in the last hour.</div>
 @endif

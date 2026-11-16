@@ -39,10 +39,23 @@
             </div>
           </div>
 
-          <div class="mb-4">
+          <div class="mb-3">
             <label class="form-label" for="editor_mobile">Editor mobile <span class="text-danger">*</span></label>
             <input class="form-control @error('editor_mobile') is-invalid @enderror" id="editor_mobile" name="editor_mobile" type="tel" placeholder="01XXXXXXXXX" value="{{ old('editor_mobile') }}" required>
             @error('editor_mobile')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="password">Password <span class="text-danger">*</span></label>
+            <input class="form-control @error('password') is-invalid @enderror" id="password" name="password" type="password" autocomplete="current-password" required>
+            @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" for="password_confirmation">Confirm password <span class="text-body-tertiary">(first-time setup only)</span></label>
+            <input class="form-control @error('password_confirmation') is-invalid @enderror" id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password">
+            @error('password_confirmation')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <div class="form-text">New portal registering? Enter the same password again here. Returning users can leave this blank.</div>
           </div>
 
           <button class="btn btn-primary w-100" type="submit">Login</button>

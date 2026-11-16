@@ -8,11 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Portal extends Model
 {
     protected $fillable = [
-        'portal_name', 'portal_reg_no', 'editor_name', 'editor_email', 'editor_mobile',
+        'portal_name', 'portal_reg_no', 'editor_name', 'editor_email', 'editor_mobile', 'password',
         'database_name', 'status', 'provisioned_at', 'provision_error', 'last_login_at',
     ];
 
+    protected $hidden = ['password'];
+
     protected $casts = [
+        'password' => 'hashed',
         'provisioned_at' => 'datetime',
         'last_login_at' => 'datetime',
     ];
@@ -39,6 +42,16 @@ class Portal extends Model
     public function charges(): HasMany
     {
         return $this->hasMany(PortalCharge::class);
+    }
+
+    public function graceRequests(): HasMany
+    {
+        return $this->hasMany(GraceRequest::class);
+    }
+
+    public function purchaseRequests(): HasMany
+    {
+        return $this->hasMany(PurchaseRequest::class);
     }
 
     public function isProvisioned(): bool

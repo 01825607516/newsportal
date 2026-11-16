@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Models\Admin;
+use App\Models\GraceRequest;
+use App\Models\PurchaseRequest;
 use Closure;
 use Illuminate\Http\Request;
 
@@ -19,6 +21,8 @@ class EnsureAdminAuthenticated
         }
 
         view()->share('currentAdmin', $admin);
+        view()->share('pendingRequestCount',
+            GraceRequest::where('status', 'pending')->count() + PurchaseRequest::where('status', 'pending')->count());
 
         return $next($request);
     }

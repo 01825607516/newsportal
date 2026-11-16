@@ -1,64 +1,177 @@
-@extends('layouts.base')
-@section('body')
-<style>
-  .adm { display: flex; min-height: 100vh; background: var(--phoenix-body-bg, #f5f7fa); }
-  .adm-side { width: 240px; flex: 0 0 240px; background: var(--phoenix-emphasis-bg, #fff); border-right: 1px solid var(--phoenix-border-color, #e3e6ed);
-              display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
-  .adm-brand { display: block; padding: 20px 24px; font-weight: 800; font-size: 1.15rem; line-height: 1.2;
-               color: var(--phoenix-emphasis-color, #31374a); border-bottom: 1px solid var(--phoenix-border-color, #e3e6ed); }
-  .adm-brand small { display: block; font-weight: 700; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--phoenix-tertiary-color, #9fa6bc); }
-  .adm-nav { padding: 14px 12px; flex: 1; }
-  .adm-nav a { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; margin-bottom: 2px; border-radius: 8px;
-               font-weight: 600; color: var(--phoenix-body-color, #525b75); text-decoration: none; }
-  .adm-nav a:hover { background: var(--phoenix-secondary-bg, #eff2f6); }
-  .adm-nav a.active { background: var(--phoenix-primary-bg-subtle, #e5edff); color: var(--phoenix-primary, #3874ff); }
-  .adm-user { padding: 16px 20px; border-top: 1px solid var(--phoenix-border-color, #e3e6ed); }
-  .adm-main { flex: 1; min-width: 0; }
-  .adm-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 32px;
-             background: var(--phoenix-emphasis-bg, #fff); border-bottom: 1px solid var(--phoenix-border-color, #e3e6ed); }
-  .adm-top h1 { font-size: 1.35rem; margin: 0; }
-  .adm-content { padding: 28px 32px; }
-  .adm .card { box-shadow: none; }
-  .adm .stat-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--phoenix-tertiary-color, #9fa6bc); font-weight: 700; }
-  .adm .stat-value { font-size: 1.7rem; font-weight: 800; line-height: 1.2; }
-  .adm .path-cell { max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  @media (max-width: 991px) {
-    .adm { flex-direction: column; }
-    .adm-side { position: static; width: 100%; height: auto; flex: none; }
-    .adm-nav { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 12px; }
-    .adm-nav a { margin: 0; }
-    .adm-top, .adm-content { padding-left: 16px; padding-right: 16px; }
-  }
-</style>
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr" data-navigation-type="default" data-navbar-horizontal-shape="default">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Admin · News Portal')</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('assets/img/favicons/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/img/favicons/favicon-32x32.png') }}">
+    <script src="{{ asset('vendors/simplebar/simplebar.min.js') }}"></script>
+    <script src="{{ asset('assets/js/config.js') }}"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
+    <link href="{{ asset('vendors/simplebar/simplebar.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/css/theme-rtl.min.css') }}" rel="stylesheet" id="style-rtl">
+    <link href="{{ asset('assets/css/theme.min.css') }}" rel="stylesheet" id="style-default">
+    <link href="{{ asset('assets/css/user-rtl.min.css') }}" rel="stylesheet" id="user-style-rtl">
+    <link href="{{ asset('assets/css/user.min.css') }}" rel="stylesheet" id="user-style-default">
+    <script>
+      var phoenixIsRTL = window.config.config.phoenixIsRTL;
+      if (phoenixIsRTL) {
+        document.getElementById('style-default').disabled = true;
+        document.getElementById('user-style-default').disabled = true;
+        document.documentElement.setAttribute('dir', 'rtl');
+      } else {
+        document.getElementById('style-rtl').disabled = true;
+        document.getElementById('user-style-rtl').disabled = true;
+      }
+    </script>
+    <style>
+      .path-cell { max-width: 340px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-<div class="adm">
-  <aside class="adm-side">
-    <a class="adm-brand" href="{{ route('admin.dashboard') }}">News Portal<small>Admin panel</small></a>
-    <nav class="adm-nav">
-      <a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">Dashboard</a>
-      <a href="{{ route('admin.portals.index') }}" class="{{ request()->routeIs('admin.portals.*') ? 'active' : '' }}">Portals</a>
-      <a href="{{ route('admin.activity.index') }}" class="{{ request()->routeIs('admin.activity.*') ? 'active' : '' }}">Activity monitor</a>
-      <a href="{{ route('admin.packages.index') }}" class="{{ request()->routeIs('admin.packages.*') ? 'active' : '' }}">Packages</a>
-    </nav>
-    <div class="adm-user">
-      <div class="fw-semibold">{{ $currentAdmin->name }}</div>
-      <div class="fs-9 text-body-tertiary mb-2">{{ $currentAdmin->email }}</div>
-      <form method="POST" action="{{ route('admin.logout') }}">@csrf
-        <button class="btn btn-sm btn-phoenix-secondary w-100" type="submit">Logout</button>
-      </form>
+      /* Tables: Phoenix-style spacing, size and header look */
+      .content .table { font-size: .875rem; margin-bottom: 0; }
+      .content .table > :not(caption) > * > * { padding: .75rem 1rem; vertical-align: middle; }
+      .content .table > :not(caption) > * > *:first-child { padding-left: 1.25rem; }
+      .content .table > :not(caption) > * > *:last-child { padding-right: 1.25rem; }
+      .content .table thead th { font-size: .72rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+                                 color: var(--phoenix-tertiary-color); white-space: nowrap; }
+      .content .table td { white-space: nowrap; }
+      .content .table td.path-cell { white-space: nowrap; }
+      .content .table code { color: var(--phoenix-body-color); font-size: .8rem; }
+      .content .card > .table-responsive { border-radius: inherit; }
+      .stat-label { font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; color: var(--phoenix-tertiary-color); font-weight: 700; }
+      .stat-value { font-size: 1.75rem; font-weight: 800; line-height: 1.2; color: var(--phoenix-emphasis-color); }
+    </style>
+</head>
+<body>
+<main class="main" id="top">
+
+  {{-- ============ Vertical sidebar (same markup as the Phoenix dashboard) ============ --}}
+  <nav class="navbar navbar-vertical navbar-expand-lg">
+    <div class="collapse navbar-collapse" id="navbarVerticalCollapse">
+      <div class="navbar-vertical-content">
+        <ul class="navbar-nav flex-column" id="navbarVerticalNav">
+          <li class="nav-item">
+            <p class="navbar-vertical-label">Admin</p>
+            <hr class="navbar-vertical-line" />
+
+            <div class="nav-item-wrapper"><a class="nav-link label-1 {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}" href="{{ route('admin.dashboard') }}" role="button" aria-expanded="false">
+                <div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="pie-chart"></span></span><span class="nav-link-text-wrapper"><span class="nav-link-text">Dashboard</span></span></div>
+              </a></div>
+
+            <div class="nav-item-wrapper"><a class="nav-link label-1 {{ request()->routeIs('admin.portals.*') ? 'active' : '' }}" href="{{ route('admin.portals.index') }}" role="button" aria-expanded="false">
+                <div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="globe"></span></span><span class="nav-link-text-wrapper"><span class="nav-link-text">Portals</span></span></div>
+              </a></div>
+
+            <div class="nav-item-wrapper"><a class="nav-link label-1 {{ request()->routeIs('admin.requests.*') ? 'active' : '' }}" href="{{ route('admin.requests.index') }}" role="button" aria-expanded="false">
+                <div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="inbox"></span></span><span class="nav-link-text-wrapper"><span class="nav-link-text">Requests</span>@if (($pendingRequestCount ?? 0) > 0)<span class="badge ms-2 badge badge-phoenix badge-phoenix-warning">{{ $pendingRequestCount }}</span>@endif</span></div>
+              </a></div>
+
+            <div class="nav-item-wrapper"><a class="nav-link label-1 {{ request()->routeIs('admin.activity.*') ? 'active' : '' }}" href="{{ route('admin.activity.index') }}" role="button" aria-expanded="false">
+                <div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="activity"></span></span><span class="nav-link-text-wrapper"><span class="nav-link-text">Activity monitor</span></span></div>
+              </a></div>
+
+            <div class="nav-item-wrapper"><a class="nav-link label-1 {{ request()->routeIs('admin.packages.*') ? 'active' : '' }}" href="{{ route('admin.packages.index') }}" role="button" aria-expanded="false">
+                <div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="package"></span></span><span class="nav-link-text-wrapper"><span class="nav-link-text">Packages</span></span></div>
+              </a></div>
+          </li>
+        </ul>
+      </div>
     </div>
-  </aside>
+    <div class="navbar-vertical-footer"><button class="btn navbar-vertical-toggle border-0 fw-semibold w-100 white-space-nowrap d-flex align-items-center"><span class="uil uil-left-arrow-to-left fs-8"></span><span class="uil uil-arrow-from-right fs-8"></span><span class="navbar-vertical-footer-text ms-2">Collapsed View</span></button></div>
+  </nav>
 
-  <div class="adm-main">
-    <header class="adm-top">
-      <h1>@yield('page_title', 'Admin')</h1>
+  {{-- ============ Top navbar ============ --}}
+  <nav class="navbar navbar-top fixed-top navbar-expand" id="navbarDefault">
+    <div class="collapse navbar-collapse justify-content-between">
+      <div class="navbar-logo">
+        <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalCollapse" aria-controls="navbarVerticalCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
+        <a class="navbar-brand me-1 me-sm-3" href="{{ route('admin.dashboard') }}">
+          <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center"><img src="{{ asset('assets/img/icons/logo.png') }}" alt="phoenix" width="27" />
+              <h5 class="logo-text ms-2 d-none d-sm-block">phoenix</h5>
+              <span class="badge badge-phoenix badge-phoenix-primary ms-2 d-none d-sm-inline-block">Admin</span>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <ul class="navbar-nav navbar-nav-icons flex-row">
+        <li class="nav-item">
+          <div class="theme-control-toggle px-2"><input class="form-check-input ms-0 theme-control-toggle-input" type="checkbox" data-theme-control="phoenixTheme" value="dark" id="themeControlToggle" /><label class="mb-0 theme-control-toggle-label theme-control-toggle-light" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px;width:32px;"><span class="icon" data-feather="moon"></span></label><label class="mb-0 theme-control-toggle-label theme-control-toggle-dark" for="themeControlToggle" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Switch theme" style="height:32px;width:32px;"><span class="icon" data-feather="sun"></span></label></div>
+        </li>
+        <li class="nav-item dropdown"><a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
+            <div class="avatar avatar-l">
+              <div class="avatar-name rounded-circle"><span>{{ strtoupper(substr($currentAdmin->name, 0, 1)) }}</span></div>
+            </div>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-profile shadow border" aria-labelledby="navbarDropdownUser">
+            <div class="card position-relative border-0">
+              <div class="card-body p-0">
+                <div class="text-center pt-4 pb-3">
+                  <div class="avatar avatar-xl">
+                    <div class="avatar-name rounded-circle"><span>{{ strtoupper(substr($currentAdmin->name, 0, 1)) }}</span></div>
+                  </div>
+                  <h6 class="mt-2 text-body-emphasis">{{ $currentAdmin->name }}</h6>
+                  <p class="fs-9 text-body-tertiary mb-0">{{ $currentAdmin->email }}</p>
+                </div>
+              </div>
+              <div class="card-footer p-0 border-top border-translucent">
+                <div class="px-3 py-3">
+                  <form method="POST" action="{{ route('admin.logout') }}">@csrf
+                    <button class="btn btn-phoenix-secondary d-flex flex-center w-100" type="submit"><span class="me-2" data-feather="log-out"></span>Sign out</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  {{-- ============ Content ============ --}}
+  <div class="content">
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div>
+        <h2 class="mb-1 lh-sm">@yield('page_title', 'Admin')</h2>
+        @hasSection('page_subtitle')<h5 class="text-body-tertiary fw-semibold mb-0">@yield('page_subtitle')</h5>@endif
+      </div>
       <div>@yield('page_actions')</div>
-    </header>
-    <div class="adm-content">
-      @if (session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
-      @if ($errors->any())<div class="alert alert-danger">@foreach ($errors->all() as $e)<div>{{ $e }}</div>@endforeach</div>@endif
-      @yield('content')
     </div>
+
+    @if (session('success'))<div class="alert alert-subtle-success" role="alert">{{ session('success') }}</div>@endif
+    @if ($errors->any())<div class="alert alert-subtle-danger" role="alert">@foreach ($errors->all() as $e)<div>{{ $e }}</div>@endforeach</div>@endif
+
+    @yield('content')
+
+    <footer class="footer position-absolute">
+      <div class="row g-0 justify-content-between align-items-center h-100">
+        <div class="col-12 col-sm-auto text-center">
+          <p class="mb-0 mt-2 mt-sm-0 text-body">News Portal Admin<span class="d-none d-sm-inline-block mx-1">|</span><br class="d-sm-none" />{{ date('Y') }} &copy;</p>
+        </div>
+        <div class="col-12 col-sm-auto text-center">
+          <p class="mb-0 text-body-tertiary text-opacity-85">v1.23.0</p>
+        </div>
+      </div>
+    </footer>
   </div>
-</div>
-@endsection
+</main>
+
+<script src="{{ asset('vendors/popper/popper.min.js') }}"></script>
+<script src="{{ asset('vendors/bootstrap/bootstrap.min.js') }}"></script>
+<script src="{{ asset('vendors/anchorjs/anchor.min.js') }}"></script>
+<script src="{{ asset('vendors/is/is.min.js') }}"></script>
+<script src="{{ asset('vendors/fontawesome/all.min.js') }}"></script>
+<script src="{{ asset('vendors/lodash/lodash.min.js') }}"></script>
+<script src="{{ asset('vendors/list.js/list.min.js') }}"></script>
+<script src="{{ asset('vendors/feather-icons/feather.min.js') }}"></script>
+<script src="{{ asset('vendors/dayjs/dayjs.min.js') }}"></script>
+<script src="{{ asset('assets/js/phoenix.js') }}"></script>
+@stack('scripts')
+</body>
+</html>

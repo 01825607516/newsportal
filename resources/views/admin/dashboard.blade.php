@@ -1,7 +1,14 @@
 @extends('layouts.admin')
 @section('title', 'Dashboard · Admin')
-@section('page_title', 'Dashboard')
+@section('page_title', 'Admin Dashboard')
+@section('page_subtitle', 'Here’s what’s going on across your portals right now')
 @section('content')
+@if (($pendingRequestCount ?? 0) > 0)
+  <div class="alert alert-subtle-info d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
+    <div><b>{{ $pendingRequestCount }}</b> request(s) from portals are waiting for your approval (grace period / renewal).</div>
+    <a class="btn btn-sm btn-phoenix-primary" href="{{ route('admin.requests.index') }}">Review requests</a>
+  </div>
+@endif
 <div class="row g-3 mb-4">
   @foreach ([['Total portals', $stats['total']], ['Active', $stats['active']], ['Suspended', $stats['suspended']], ['Requests (24h)', $stats['requests24']]] as [$label, $value])
     <div class="col-6 col-xl-3"><div class="card"><div class="card-body">
