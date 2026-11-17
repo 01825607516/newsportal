@@ -31,6 +31,7 @@
         document.getElementById('user-style-rtl').disabled = true;
       }
     </script>
+    <script>window.portalAssetBase = @json(rtrim(asset(''), '/'));</script>
     @vite('v1.23.0/src/project-management.js')
 </head>
 <body>
@@ -42,6 +43,8 @@
 @endphp
 <style>
     .sub-toast { position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); z-index: 2100; width: min(34rem, 92vw); }
+    .admin-support-banner { position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); z-index: 2200; width: min(52rem, 92vw); }
+    .portal-support-notice { position: fixed; top: 5rem; right: 1rem; z-index: 2200; width: min(36rem, calc(100vw - 2rem)); }
     .plan-card { cursor: pointer; display: block; border: 1px solid var(--phoenix-border-color); border-radius: .5rem; padding: .75rem 1rem; margin-bottom: .6rem; }
     .plan-card:hover { border-color: var(--phoenix-primary); }
     .plan-card input:checked ~ .plan-body { color: var(--phoenix-primary); }
@@ -109,10 +112,12 @@
 
     <div id="sub-nav-right" class="d-flex align-items-center gap-2 me-2">
         {{-- The Grace Period button lives in the "expiring soon" banner, which only shows inside the package's window. --}}
-        <button type="button" class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">Purchase</button>
+        @unless ($adminSupport ?? false)
+            <button type="button" class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">Purchase</button>
+        @endunless
     </div>
 
-    <form id="sub-logout-form" method="POST" action="{{ route('portal.logout') }}">@csrf</form>
+    <form id="sub-logout-form" method="POST" action="{{ ($adminSupport ?? false) ? route('admin.support.end', $adminSupportSession) : route('portal.logout') }}">@csrf</form>
 </div>
 
 @if (session('billing_success'))
@@ -143,7 +148,27 @@
     </script>
 @endif
 
-@if ($b && $b['banner']['show'])
+@if (!empty($adminSupportSession))
+    <div class="admin-support-banner alert alert-subtle-warning d-flex flex-wrap justify-content-between align-items-center gap-3" role="status">
+        <div>
+            <strong>Admin support mode · read-only</strong><br>
+            You are viewing {{ $currentPortal->portal_name }} as {{ $supportAdmin->name }}. This session is audited.
+        </div>
+        <form method="POST" action="{{ route('admin.support.end', $adminSupportSession) }}">
+            @csrf
+            <button type="submit" class="btn btn-warning text-nowrap">End support session</button>
+        </form>
+    </div>
+@endif
+
+@if (!empty($activeSupportSession))
+    <div class="portal-support-notice alert alert-subtle-warning d-flex align-items-start gap-2" role="status">
+        <span class="fa-solid fa-eye mt-1" aria-hidden="true"></span>
+        <div><strong>Admin support session active.</strong><br>{{ $activeSupportSession->admin_name }} is viewing this portal in read-only mode.</div>
+    </div>
+@endif
+
+@if ($b && $b['banner']['show'] && !($adminSupport ?? false))
     @php
         $bInfo = $b['info'];
         $bSub = $bInfo['subscription'];
@@ -169,6 +194,7 @@
             <div class="sub-banner-bar" aria-hidden="true"><span style="width: {{ $bPct }}%"></span></div>
         </div>
 
+        @unless ($adminSupport ?? false)
         <div class="sub-banner-actions">
             @if ($b['grace']['can_request'] || $b['pendingGrace'])
                 <button type="button" class="btn btn-sm btn-phoenix-{{ $bTone }} px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#graceModal">
@@ -179,6 +205,7 @@
                 <span class="fa-regular fa-credit-card me-1"></span>Renew now
             </button>
         </div>
+        @endunless
 
         <button type="button" class="sub-banner-close" id="subscription-banner-close" aria-label="Dismiss" title="Dismiss">
             <span class="fa-solid fa-xmark"></span>
@@ -188,7 +215,7 @@
 
 <div id="app"></div>
 
-@if ($b)
+@if ($b && !($adminSupport ?? false))
 {{-- ============ Grace period popup ============ --}}
 <div class="modal fade" id="graceModal" tabindex="-1" aria-labelledby="graceModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

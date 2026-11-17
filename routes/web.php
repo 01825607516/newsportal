@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BillingController as AdminBillingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\PortalController as AdminPortalController;
+use App\Http\Controllers\Admin\PortalSupportController as AdminPortalSupportController;
 use App\Http\Controllers\Admin\RequestController as AdminRequestController;
 use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\PortalAuthController;
@@ -42,6 +43,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity.index');
         Route::get('/portals', [AdminPortalController::class, 'index'])->name('portals.index');
         Route::get('/portals/{portal}', [AdminPortalController::class, 'show'])->name('portals.show');
+        Route::post('/portals/{portal}/support-session', [AdminPortalSupportController::class, 'start'])->name('portals.support.start');
+        Route::get('/support-sessions/{supportSession}', [AdminPortalSupportController::class, 'show'])->name('support.show');
+        Route::post('/support-sessions/{supportSession}/end', [AdminPortalSupportController::class, 'end'])->name('support.end');
         Route::put('/portals/{portal}', [AdminPortalController::class, 'update'])->name('portals.update');
         Route::post('/portals/{portal}/toggle', [AdminPortalController::class, 'toggleStatus'])->name('portals.toggle');
         Route::post('/portals/{portal}/provision', [AdminPortalController::class, 'reprovision'])->name('portals.provision');

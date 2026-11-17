@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use App\Models\GraceRequest;
 use App\Models\Package;
 use App\Models\Portal;
+use App\Models\PortalSupportSession;
 use App\Models\PurchaseRequest;
 use App\Services\SubscriptionService;
+use App\Services\TenantManager;
 use Illuminate\Http\Request;
 
 /**
@@ -21,7 +24,36 @@ class PortalBillingController extends Controller
         /** @var Portal $portal */
         $portal = $request->attributes->get('portal');
 
-        return view('dashboard', ['billing' => $this->panel($portal, $subs)]);
+        $activeSupportSession = PortalSupportSession::where('portal_id', $portal->id)
+            ->whereNull('ended_at')
+            ->where('last_activity_at', '>=', now()->subMinutes(30))
+            ->latest('started_at')
+            ->first();
+
+        return view('dashboard', [
+            'billing' => $this->panel($portal, $subs),
+            'activeSupportSession' => $activeSupportSession,
+        ]);
+    }
+
+    public function renderAdminSupportDashboard(
+        Portal $portal,
+        Admin $admin,
+        PortalSupportSession $supportSession,
+        SubscriptionService $subs
+    ) {
+        TenantManager::connect($portal);
+        $billing = $this->panel($portal, $subs);
+
+        return view('dashboard', [
+            'billing' => $billing,
+            'currentPortal' => $portal,
+            'subscriptionInfo' => $billing['info'],
+            'adminSupport' => true,
+            'supportAdmin' => $admin,
+            'adminSupportSession' => $supportSession,
+            'activeSupportSession' => null,
+        ]);
     }
 
     public function requestGrace(Request $request, SubscriptionService $subs)

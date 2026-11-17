@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Package;
 use App\Models\Portal;
 use App\Models\PortalActivity;
+use App\Models\PortalSupportEvent;
 use App\Services\ActivityMonitor;
 use App\Services\SubscriptionService;
 use App\Services\TenantManager;
@@ -53,6 +54,11 @@ class PortalController extends Controller
             'tab' => $tab,
             'info' => $subs->info($portal),
             'alerts' => $monitor->alerts($portal),
+            'supportEvents' => PortalSupportEvent::whereHas('supportSession', fn ($query) => $query->where('portal_id', $portal->id))
+                ->with('supportSession')
+                ->latest('created_at')
+                ->limit(20)
+                ->get(),
         ];
 
         if ($tab === 'overview') {

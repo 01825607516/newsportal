@@ -59,6 +59,11 @@ class Portal extends Model
         return $this->hasMany(PurchaseRequest::class);
     }
 
+    public function supportSessions(): HasMany
+    {
+        return $this->hasMany(PortalSupportSession::class);
+    }
+
     public function isProvisioned(): bool
     {
         return $this->provisioned_at !== null && $this->database_name !== null;

@@ -16,11 +16,19 @@
       <span class="fs-9 text-body-tertiary">{{ $portal->editor_mobile }} · {{ $portal->database_name ?: 'no database' }}</span>
     </div>
   </div>
-  <form method="POST" action="{{ route('admin.portals.toggle', $portal) }}"
-        @if ($portal->isActive()) data-confirm="Suspend this portal? The editor will be blocked from logging in." @endif>
-    @csrf
-    <button class="btn btn-{{ $portal->isActive() ? 'warning' : 'success' }}" type="submit">{{ $portal->isActive() ? 'Suspend portal' : 'Activate portal' }}</button>
-  </form>
+  <div class="d-flex flex-wrap gap-2">
+    @if ($portal->isProvisioned())
+      <form method="POST" action="{{ route('admin.portals.support.start', $portal) }}">
+        @csrf
+        <button class="btn btn-phoenix-primary" type="submit">Open read-only support view</button>
+      </form>
+    @endif
+    <form method="POST" action="{{ route('admin.portals.toggle', $portal) }}"
+          @if ($portal->isActive()) data-confirm="Suspend this portal? The editor will be blocked from logging in." @endif>
+      @csrf
+      <button class="btn btn-{{ $portal->isActive() ? 'warning' : 'success' }}" type="submit">{{ $portal->isActive() ? 'Suspend portal' : 'Activate portal' }}</button>
+    </form>
+  </div>
 </div>
 
 <ul class="nav nav-tabs mb-4">
@@ -134,4 +142,25 @@
   @include('admin.partials._activity_filters', ['ranges' => $ranges, 'hidden' => ['tab' => 'activity']])
   @include('admin.partials._activity_table', ['logs' => $logs, 'showPortal' => false])
 @endif
+
+<div class="card mt-4">
+  <div class="card-header"><h5 class="mb-0">Admin support audit</h5></div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0 align-middle">
+      <thead><tr><th>Admin</th><th>Action</th><th>Page</th><th>When</th></tr></thead>
+      <tbody>
+      @forelse ($supportEvents as $event)
+        <tr>
+          <td>{{ $event->supportSession->admin_name }}</td>
+          <td>{{ ucfirst(str_replace('_', ' ', $event->action)) }}</td>
+          <td><code>{{ $event->path ?: '—' }}</code></td>
+          <td class="fs-9">{{ $event->created_at?->format('d M Y H:i:s') }}</td>
+        </tr>
+      @empty
+        <tr><td colspan="4" class="text-center text-body-tertiary py-4">No admin support sessions yet.</td></tr>
+      @endforelse
+      </tbody>
+    </table>
+  </div>
+</div>
 @endsection

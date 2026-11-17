@@ -1,7 +1,13 @@
 <script setup>
 import { onMounted } from 'vue'
 
-const pageScripts = ["../vendors/popper/popper.min.js","../vendors/bootstrap/bootstrap.min.js","../vendors/anchorjs/anchor.min.js","../vendors/is/is.min.js","../vendors/fontawesome/all.min.js","../vendors/lodash/lodash.min.js","../vendors/list.js/list.min.js","../vendors/feather-icons/feather.min.js","../vendors/dayjs/dayjs.min.js","../vendors/choices/choices.min.js","../vendors/echarts/echarts.min.js","../vendors/dhtmlx-gantt/dhtmlxgantt.js","../vendors/flatpickr/flatpickr.min.js","../assets/js/phoenix.js","../assets/js/dashboards/projectmanagement-dashboard.js"]
+const assetBase = (window.portalAssetBase || window.location.origin).replace(/\/+$/, '')
+
+function assetUrl(path) {
+  return `${assetBase}/${path.replace(/^(\.\.\/)+/, '')}`
+}
+
+const pageScripts = ["../vendors/popper/popper.min.js","../vendors/bootstrap/bootstrap.min.js","../vendors/anchorjs/anchor.min.js","../vendors/is/is.min.js","../vendors/fontawesome/all.min.js","../vendors/lodash/lodash.min.js","../vendors/list.js/list.min.js","../vendors/feather-icons/feather.min.js","../vendors/dayjs/dayjs.min.js","../vendors/choices/choices.min.js","../vendors/echarts/echarts.min.js","../vendors/dhtmlx-gantt/dhtmlxgantt.js","../vendors/flatpickr/flatpickr.min.js","../assets/js/phoenix.js","../assets/js/dashboards/projectmanagement-dashboard.js"].map(assetUrl)
 
 function loadScript(src) {
   return new Promise((resolve, reject) => {
@@ -13,7 +19,15 @@ function loadScript(src) {
   })
 }
 
+function resolveInlineAssetUrls() {
+  document.querySelectorAll('#app [style*="../assets/"]').forEach((element) => {
+    const style = element.getAttribute('style')
+    if (style) element.setAttribute('style', style.replace(/\.\.\/assets\//g, `${assetBase}/assets/`))
+  })
+}
+
 onMounted(async () => {
+  resolveInlineAssetUrls()
   for (const src of pageScripts) await loadScript(src)
   initializeNavigation()
 })
@@ -1552,7 +1566,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
             <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalCollapse" aria-controls="navbarVerticalCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
             <a class="navbar-brand me-1 me-sm-3" href="../index.html">
               <div class="d-flex align-items-center">
-                <div class="d-flex align-items-center"><img src="../assets/img/icons/logo.png" alt="phoenix" width="27" />
+                <div class="d-flex align-items-center"><img :src="assetUrl('assets/img/icons/logo.png')" alt="phoenix" width="27" />
                   <h5 class="logo-text ms-2 d-none d-sm-block">phoenix</h5>
                 </div>
               </div>
@@ -1583,14 +1597,14 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                   <hr class="my-0" />
                   <h6 class="dropdown-header text-body-highlight fs-9 border-bottom border-translucent py-2 lh-sm">Products</h6>
                   <div class="py-2"><a class="dropdown-item py-2 d-flex align-items-center" href="../apps/e-commerce/landing/product-details.html">
-                      <div class="file-thumbnail me-2"><img class="h-100 w-100 object-fit-cover rounded-3" src="../assets/img/products/60x60/3.png" alt="" /></div>
+                      <div class="file-thumbnail me-2"><img class="h-100 w-100 object-fit-cover rounded-3" :src="assetUrl('assets/img/products/60x60/3.png')" alt="" /></div>
                       <div class="flex-1">
                         <h6 class="mb-0 text-body-highlight title">MacBook Air - 13″</h6>
                         <p class="fs-10 mb-0 d-flex text-body-tertiary"><span class="fw-medium text-body-tertiary text-opactity-85">8GB Memory - 1.6GHz - 128GB Storage</span></p>
                       </div>
                     </a>
                     <a class="dropdown-item py-2 d-flex align-items-center" href="../apps/e-commerce/landing/product-details.html">
-                      <div class="file-thumbnail me-2"><img class="img-fluid" src="../assets/img/products/60x60/3.png" alt="" /></div>
+                      <div class="file-thumbnail me-2"><img class="img-fluid" :src="assetUrl('assets/img/products/60x60/3.png')" alt="" /></div>
                       <div class="flex-1">
                         <h6 class="mb-0 text-body-highlight title">MacBook Pro - 13″</h6>
                         <p class="fs-10 mb-0 d-flex text-body-tertiary"><span class="fw-medium text-body-tertiary text-opactity-85">30 Sep at 12:30 PM</span></p>
@@ -1632,7 +1646,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                   <h6 class="dropdown-header text-body-highlight fs-9 border-bottom border-translucent py-2 lh-sm">Members</h6>
                   <div class="py-2"><a class="dropdown-item py-2 d-flex align-items-center" href="../pages/members.html">
                       <div class="avatar avatar-l status-online  me-2 text-body">
-                        <img class="rounded-circle " src="../assets/img/team/40x40/10.webp" alt="" />
+                        <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/10.webp')" alt="" />
                       </div>
                       <div class="flex-1">
                         <h6 class="mb-0 text-body-highlight title">Carry Anna</h6>
@@ -1641,7 +1655,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     </a>
                     <a class="dropdown-item py-2 d-flex align-items-center" href="../pages/members.html">
                       <div class="avatar avatar-l  me-2 text-body">
-                        <img class="rounded-circle " src="../assets/img/team/40x40/12.webp" alt="" />
+                        <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/12.webp')" alt="" />
                       </div>
                       <div class="flex-1">
                         <h6 class="mb-0 text-body-highlight title">John Smith</h6>
@@ -1688,7 +1702,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative read border-bottom">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/30.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/30.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">10m</span></p>
@@ -1720,7 +1734,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" src="../assets/img/team/40x40/avatar.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/40x40/avatar.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">1h</span></p>
@@ -1735,7 +1749,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/57.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Kiera Anderson</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -1750,7 +1764,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/59.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/59.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Herman Carter</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👤</span>Tagged you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -1765,7 +1779,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative read ">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/58.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/58.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Benjamin Button</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -1801,46 +1815,46 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                 <div class="card bg-body-emphasis position-relative border-0">
                   <div class="card-body pt-3 px-3 pb-0 overflow-auto scrollbar" style="height: 20rem;">
                     <div class="row text-center align-items-center gx-0 gy-0">
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/behance.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/behance.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Behance</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-cloud.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-cloud.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Cloud</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/slack.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/slack.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Slack</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/gitlab.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/gitlab.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Gitlab</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/bitbucket.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/bitbucket.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">BitBucket</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-drive.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-drive.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Drive</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/trello.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/trello.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Trello</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/figma.webp" alt="" width="20" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/figma.webp')" alt="" width="20" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Figma</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/twitter.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/twitter.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Twitter</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/pinterest.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/pinterest.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Pinterest</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/ln.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/ln.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Linkedin</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-maps.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-maps.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Maps</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-photos.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-photos.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Photos</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/spotify.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/spotify.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Spotify</p>
                         </a></div>
                     </div>
@@ -1850,7 +1864,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
             </li>
             <li class="nav-item dropdown"><a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
                 <div class="avatar avatar-l ">
-                  <img class="rounded-circle " src="../assets/img/team/40x40/57.webp" alt="" />
+                  <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" />
                 </div>
               </a>
               <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-profile shadow border" aria-labelledby="navbarDropdownUser">
@@ -1858,7 +1872,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                   <div class="card-body p-0">
                     <div class="text-center pt-4 pb-3">
                       <div class="avatar avatar-xl ">
-                        <img class="rounded-circle " src="../assets/img/team/72x72/57.webp" alt="" />
+                        <img class="rounded-circle " :src="assetUrl('assets/img/team/72x72/57.webp')" alt="" />
                       </div>
                       <h6 class="mt-2 text-body-emphasis">Jerry Seinfield</h6>
                     </div>
@@ -1913,7 +1927,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative read border-bottom">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/30.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/30.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">10m</span></p>
@@ -1945,7 +1959,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" src="../assets/img/team/40x40/avatar.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/40x40/avatar.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">1h</span></p>
@@ -1960,7 +1974,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/57.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Kiera Anderson</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -1975,7 +1989,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/59.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/59.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Herman Carter</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👤</span>Tagged you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -1990,7 +2004,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <div class="px-2 px-sm-3 py-3 notification-card position-relative read ">
                         <div class="d-flex align-items-center justify-content-between position-relative">
                           <div class="d-flex">
-                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/58.webp" alt="" /></div>
+                            <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/58.webp')" alt="" /></div>
                             <div class="flex-1 me-sm-3">
                               <h4 class="fs-9 text-body-emphasis">Benjamin Button</h4>
                               <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -2026,46 +2040,46 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                 <div class="card bg-body-emphasis position-relative border-0">
                   <div class="card-body pt-3 px-3 pb-0 overflow-auto scrollbar" style="height: 20rem;">
                     <div class="row text-center align-items-center gx-0 gy-0">
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/behance.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/behance.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Behance</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-cloud.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-cloud.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Cloud</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/slack.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/slack.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Slack</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/gitlab.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/gitlab.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Gitlab</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/bitbucket.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/bitbucket.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">BitBucket</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-drive.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-drive.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Drive</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/trello.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/trello.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Trello</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/figma.webp" alt="" width="20" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/figma.webp')" alt="" width="20" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Figma</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/twitter.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/twitter.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Twitter</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/pinterest.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/pinterest.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Pinterest</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/ln.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/ln.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Linkedin</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-maps.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-maps.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Maps</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-photos.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-photos.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Photos</p>
                         </a></div>
-                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/spotify.webp" alt="" width="30" />
+                      <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/spotify.webp')" alt="" width="30" />
                           <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Spotify</p>
                         </a></div>
                     </div>
@@ -2079,7 +2093,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                   <div class="card-body p-0">
                     <div class="text-center pt-4 pb-3">
                       <div class="avatar avatar-xl ">
-                        <img class="rounded-circle " src="../assets/img/team/72x72/57.webp" alt="" />
+                        <img class="rounded-circle " :src="assetUrl('assets/img/team/72x72/57.webp')" alt="" />
                       </div>
                       <h6 class="mt-2 text-body-emphasis">Jerry Seinfield</h6>
                     </div>
@@ -2114,7 +2128,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
           <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTopCollapse" aria-controls="navbarTopCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
           <a class="navbar-brand me-1 me-sm-3" href="../index.html">
             <div class="d-flex align-items-center">
-              <div class="d-flex align-items-center"><img src="../assets/img/icons/logo.png" alt="phoenix" width="27" />
+              <div class="d-flex align-items-center"><img :src="assetUrl('assets/img/icons/logo.png')" alt="phoenix" width="27" />
                 <h5 class="logo-text ms-2 d-none d-sm-block">phoenix</h5>
               </div>
             </div>
@@ -2778,7 +2792,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative read border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/30.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/30.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">10m</span></p>
@@ -2810,7 +2824,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" src="../assets/img/team/40x40/avatar.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/40x40/avatar.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">1h</span></p>
@@ -2825,7 +2839,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/57.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Kiera Anderson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -2840,7 +2854,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/59.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/59.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Herman Carter</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👤</span>Tagged you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -2855,7 +2869,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative read ">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/58.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/58.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Benjamin Button</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -2891,46 +2905,46 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
               <div class="card bg-body-emphasis position-relative border-0">
                 <div class="card-body pt-3 px-3 pb-0 overflow-auto scrollbar" style="height: 20rem;">
                   <div class="row text-center align-items-center gx-0 gy-0">
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/behance.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/behance.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Behance</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-cloud.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-cloud.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Cloud</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/slack.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/slack.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Slack</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/gitlab.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/gitlab.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Gitlab</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/bitbucket.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/bitbucket.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">BitBucket</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-drive.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-drive.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Drive</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/trello.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/trello.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Trello</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/figma.webp" alt="" width="20" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/figma.webp')" alt="" width="20" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Figma</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/twitter.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/twitter.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Twitter</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/pinterest.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/pinterest.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Pinterest</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/ln.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/ln.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Linkedin</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-maps.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-maps.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Maps</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-photos.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-photos.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Photos</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/spotify.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/spotify.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Spotify</p>
                       </a></div>
                   </div>
@@ -2940,7 +2954,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
           </li>
           <li class="nav-item dropdown"><a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
               <div class="avatar avatar-l ">
-                <img class="rounded-circle " src="../assets/img/team/40x40/57.webp" alt="" />
+                <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" />
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-profile shadow border" aria-labelledby="navbarDropdownUser">
@@ -2948,7 +2962,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                 <div class="card-body p-0">
                   <div class="text-center pt-4 pb-3">
                     <div class="avatar avatar-xl ">
-                      <img class="rounded-circle " src="../assets/img/team/72x72/57.webp" alt="" />
+                      <img class="rounded-circle " :src="assetUrl('assets/img/team/72x72/57.webp')" alt="" />
                     </div>
                     <h6 class="mt-2 text-body-emphasis">Jerry Seinfield</h6>
                   </div>
@@ -3640,7 +3654,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative read border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/30.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/30.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">10m</span></p>
@@ -3672,7 +3686,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" src="../assets/img/team/40x40/avatar.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/40x40/avatar.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">1h</span></p>
@@ -3687,7 +3701,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/57.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Kiera Anderson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -3702,7 +3716,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/59.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/59.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Herman Carter</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👤</span>Tagged you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -3717,7 +3731,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative read ">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/58.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/58.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Benjamin Button</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -3753,46 +3767,46 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
               <div class="card bg-body-emphasis position-relative border-0">
                 <div class="card-body pt-3 px-3 pb-0 overflow-auto scrollbar" style="height: 20rem;">
                   <div class="row text-center align-items-center gx-0 gy-0">
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/behance.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/behance.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Behance</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-cloud.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-cloud.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Cloud</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/slack.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/slack.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Slack</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/gitlab.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/gitlab.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Gitlab</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/bitbucket.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/bitbucket.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">BitBucket</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-drive.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-drive.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Drive</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/trello.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/trello.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Trello</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/figma.webp" alt="" width="20" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/figma.webp')" alt="" width="20" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Figma</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/twitter.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/twitter.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Twitter</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/pinterest.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/pinterest.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Pinterest</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/ln.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/ln.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Linkedin</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-maps.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-maps.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Maps</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-photos.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-photos.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Photos</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/spotify.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/spotify.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Spotify</p>
                       </a></div>
                   </div>
@@ -3806,7 +3820,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                 <div class="card-body p-0">
                   <div class="text-center pt-4 pb-3">
                     <div class="avatar avatar-xl ">
-                      <img class="rounded-circle " src="../assets/img/team/72x72/57.webp" alt="" />
+                      <img class="rounded-circle " :src="assetUrl('assets/img/team/72x72/57.webp')" alt="" />
                     </div>
                     <h6 class="mt-2 text-body-emphasis">Jerry Seinfield</h6>
                   </div>
@@ -3840,7 +3854,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
           <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalCollapse" aria-controls="navbarVerticalCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
           <a class="navbar-brand me-1 me-sm-3" href="../index.html">
             <div class="d-flex align-items-center">
-              <div class="d-flex align-items-center"><img src="../assets/img/icons/logo.png" alt="phoenix" width="27" />
+              <div class="d-flex align-items-center"><img :src="assetUrl('assets/img/icons/logo.png')" alt="phoenix" width="27" />
                 <h5 class="logo-text ms-2 d-none d-sm-block">phoenix</h5>
               </div>
             </div>
@@ -4504,7 +4518,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative read border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/30.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/30.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">10m</span></p>
@@ -4536,7 +4550,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" src="../assets/img/team/40x40/avatar.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/40x40/avatar.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">1h</span></p>
@@ -4551,7 +4565,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/57.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Kiera Anderson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -4566,7 +4580,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/59.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/59.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Herman Carter</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👤</span>Tagged you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -4581,7 +4595,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative read ">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/58.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/58.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Benjamin Button</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -4617,46 +4631,46 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
               <div class="card bg-body-emphasis position-relative border-0">
                 <div class="card-body pt-3 px-3 pb-0 overflow-auto scrollbar" style="height: 20rem;">
                   <div class="row text-center align-items-center gx-0 gy-0">
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/behance.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/behance.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Behance</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-cloud.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-cloud.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Cloud</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/slack.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/slack.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Slack</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/gitlab.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/gitlab.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Gitlab</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/bitbucket.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/bitbucket.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">BitBucket</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-drive.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-drive.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Drive</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/trello.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/trello.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Trello</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/figma.webp" alt="" width="20" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/figma.webp')" alt="" width="20" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Figma</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/twitter.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/twitter.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Twitter</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/pinterest.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/pinterest.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Pinterest</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/ln.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/ln.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Linkedin</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-maps.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-maps.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Maps</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-photos.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-photos.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Photos</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/spotify.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/spotify.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Spotify</p>
                       </a></div>
                   </div>
@@ -4666,7 +4680,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
           </li>
           <li class="nav-item dropdown"><a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
               <div class="avatar avatar-l ">
-                <img class="rounded-circle " src="../assets/img/team/40x40/57.webp" alt="" />
+                <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" />
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-profile shadow border" aria-labelledby="navbarDropdownUser">
@@ -4674,7 +4688,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                 <div class="card-body p-0">
                   <div class="text-center pt-4 pb-3">
                     <div class="avatar avatar-xl ">
-                      <img class="rounded-circle " src="../assets/img/team/72x72/57.webp" alt="" />
+                      <img class="rounded-circle " :src="assetUrl('assets/img/team/72x72/57.webp')" alt="" />
                     </div>
                     <h6 class="mt-2 text-body-emphasis">Jerry Seinfield</h6>
                   </div>
@@ -5366,7 +5380,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative read border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/30.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/30.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">10m</span></p>
@@ -5398,7 +5412,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" src="../assets/img/team/40x40/avatar.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/40x40/avatar.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">1h</span></p>
@@ -5413,7 +5427,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/57.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Kiera Anderson</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -5428,7 +5442,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/59.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/59.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Herman Carter</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👤</span>Tagged you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -5443,7 +5457,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="px-2 px-sm-3 py-3 notification-card position-relative read ">
                       <div class="d-flex align-items-center justify-content-between position-relative">
                         <div class="d-flex">
-                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/58.webp" alt="" /></div>
+                          <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/58.webp')" alt="" /></div>
                           <div class="flex-1 me-sm-3">
                             <h4 class="fs-9 text-body-emphasis">Benjamin Button</h4>
                             <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -5479,46 +5493,46 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
               <div class="card bg-body-emphasis position-relative border-0">
                 <div class="card-body pt-3 px-3 pb-0 overflow-auto scrollbar" style="height: 20rem;">
                   <div class="row text-center align-items-center gx-0 gy-0">
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/behance.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/behance.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Behance</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-cloud.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-cloud.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Cloud</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/slack.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/slack.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Slack</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/gitlab.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/gitlab.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Gitlab</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/bitbucket.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/bitbucket.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">BitBucket</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-drive.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-drive.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Drive</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/trello.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/trello.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Trello</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/figma.webp" alt="" width="20" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/figma.webp')" alt="" width="20" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Figma</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/twitter.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/twitter.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Twitter</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/pinterest.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/pinterest.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Pinterest</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/ln.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/ln.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Linkedin</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-maps.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-maps.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Maps</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-photos.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-photos.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Photos</p>
                       </a></div>
-                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/spotify.webp" alt="" width="30" />
+                    <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/spotify.webp')" alt="" width="30" />
                         <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Spotify</p>
                       </a></div>
                   </div>
@@ -5532,7 +5546,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                 <div class="card-body p-0">
                   <div class="text-center pt-4 pb-3">
                     <div class="avatar avatar-xl ">
-                      <img class="rounded-circle " src="../assets/img/team/72x72/57.webp" alt="" />
+                      <img class="rounded-circle " :src="assetUrl('assets/img/team/72x72/57.webp')" alt="" />
                     </div>
                     <h6 class="mt-2 text-body-emphasis">Jerry Seinfield</h6>
                   </div>
@@ -5568,7 +5582,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
               <button class="btn navbar-toggler navbar-toggler-humburger-icon hover-bg-transparent" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTopCollapse" aria-controls="navbarTopCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
               <a class="navbar-brand me-1 me-sm-3" href="../index.html">
                 <div class="d-flex align-items-center">
-                  <div class="d-flex align-items-center"><img src="../assets/img/icons/logo.png" alt="phoenix" width="27" />
+                  <div class="d-flex align-items-center"><img :src="assetUrl('assets/img/icons/logo.png')" alt="phoenix" width="27" />
                     <h5 class="logo-text ms-2 d-none d-sm-block">phoenix</h5>
                   </div>
                 </div>
@@ -5599,14 +5613,14 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <hr class="my-0" />
                     <h6 class="dropdown-header text-body-highlight fs-9 border-bottom border-translucent py-2 lh-sm">Products</h6>
                     <div class="py-2"><a class="dropdown-item py-2 d-flex align-items-center" href="../apps/e-commerce/landing/product-details.html">
-                        <div class="file-thumbnail me-2"><img class="h-100 w-100 object-fit-cover rounded-3" src="../assets/img/products/60x60/3.png" alt="" /></div>
+                        <div class="file-thumbnail me-2"><img class="h-100 w-100 object-fit-cover rounded-3" :src="assetUrl('assets/img/products/60x60/3.png')" alt="" /></div>
                         <div class="flex-1">
                           <h6 class="mb-0 text-body-highlight title">MacBook Air - 13″</h6>
                           <p class="fs-10 mb-0 d-flex text-body-tertiary"><span class="fw-medium text-body-tertiary text-opactity-85">8GB Memory - 1.6GHz - 128GB Storage</span></p>
                         </div>
                       </a>
                       <a class="dropdown-item py-2 d-flex align-items-center" href="../apps/e-commerce/landing/product-details.html">
-                        <div class="file-thumbnail me-2"><img class="img-fluid" src="../assets/img/products/60x60/3.png" alt="" /></div>
+                        <div class="file-thumbnail me-2"><img class="img-fluid" :src="assetUrl('assets/img/products/60x60/3.png')" alt="" /></div>
                         <div class="flex-1">
                           <h6 class="mb-0 text-body-highlight title">MacBook Pro - 13″</h6>
                           <p class="fs-10 mb-0 d-flex text-body-tertiary"><span class="fw-medium text-body-tertiary text-opactity-85">30 Sep at 12:30 PM</span></p>
@@ -5648,7 +5662,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <h6 class="dropdown-header text-body-highlight fs-9 border-bottom border-translucent py-2 lh-sm">Members</h6>
                     <div class="py-2"><a class="dropdown-item py-2 d-flex align-items-center" href="../pages/members.html">
                         <div class="avatar avatar-l status-online  me-2 text-body">
-                          <img class="rounded-circle " src="../assets/img/team/40x40/10.webp" alt="" />
+                          <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/10.webp')" alt="" />
                         </div>
                         <div class="flex-1">
                           <h6 class="mb-0 text-body-highlight title">Carry Anna</h6>
@@ -5657,7 +5671,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       </a>
                       <a class="dropdown-item py-2 d-flex align-items-center" href="../pages/members.html">
                         <div class="avatar avatar-l  me-2 text-body">
-                          <img class="rounded-circle " src="../assets/img/team/40x40/12.webp" alt="" />
+                          <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/12.webp')" alt="" />
                         </div>
                         <div class="flex-1">
                           <h6 class="mb-0 text-body-highlight title">John Smith</h6>
@@ -5703,7 +5717,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <div class="px-2 px-sm-3 py-3 notification-card position-relative read border-bottom">
                           <div class="d-flex align-items-center justify-content-between position-relative">
                             <div class="d-flex">
-                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/30.webp" alt="" /></div>
+                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/30.webp')" alt="" /></div>
                               <div class="flex-1 me-sm-3">
                                 <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                                 <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">10m</span></p>
@@ -5735,7 +5749,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                           <div class="d-flex align-items-center justify-content-between position-relative">
                             <div class="d-flex">
-                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" src="../assets/img/team/40x40/avatar.webp" alt="" /></div>
+                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/40x40/avatar.webp')" alt="" /></div>
                               <div class="flex-1 me-sm-3">
                                 <h4 class="fs-9 text-body-emphasis">Jessie Samson</h4>
                                 <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10">1h</span></p>
@@ -5750,7 +5764,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                           <div class="d-flex align-items-center justify-content-between position-relative">
                             <div class="d-flex">
-                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/57.webp" alt="" /></div>
+                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" /></div>
                               <div class="flex-1 me-sm-3">
                                 <h4 class="fs-9 text-body-emphasis">Kiera Anderson</h4>
                                 <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>💬</span>Mentioned you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -5765,7 +5779,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <div class="px-2 px-sm-3 py-3 notification-card position-relative unread border-bottom">
                           <div class="d-flex align-items-center justify-content-between position-relative">
                             <div class="d-flex">
-                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/59.webp" alt="" /></div>
+                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/59.webp')" alt="" /></div>
                               <div class="flex-1 me-sm-3">
                                 <h4 class="fs-9 text-body-emphasis">Herman Carter</h4>
                                 <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👤</span>Tagged you in a comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -5780,7 +5794,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <div class="px-2 px-sm-3 py-3 notification-card position-relative read ">
                           <div class="d-flex align-items-center justify-content-between position-relative">
                             <div class="d-flex">
-                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" src="../assets/img/team/40x40/58.webp" alt="" /></div>
+                              <div class="avatar avatar-m status-online me-3"><img class="rounded-circle" :src="assetUrl('assets/img/team/40x40/58.webp')" alt="" /></div>
                               <div class="flex-1 me-sm-3">
                                 <h4 class="fs-9 text-body-emphasis">Benjamin Button</h4>
                                 <p class="fs-9 text-body-highlight mb-2 mb-sm-3 fw-normal"><span class='me-1 fs-10'>👍</span>Liked your comment.<span class="ms-2 text-body-quaternary text-opacity-75 fw-bold fs-10"></span></p>
@@ -5816,46 +5830,46 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                   <div class="card bg-body-emphasis position-relative border-0">
                     <div class="card-body pt-3 px-3 pb-0 overflow-auto scrollbar" style="height: 20rem;">
                       <div class="row text-center align-items-center gx-0 gy-0">
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/behance.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/behance.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Behance</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-cloud.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-cloud.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Cloud</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/slack.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/slack.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Slack</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/gitlab.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/gitlab.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Gitlab</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/bitbucket.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/bitbucket.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">BitBucket</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-drive.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-drive.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Drive</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/trello.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/trello.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Trello</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/figma.webp" alt="" width="20" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/figma.webp')" alt="" width="20" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Figma</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/twitter.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/twitter.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Twitter</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/pinterest.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/pinterest.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Pinterest</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/ln.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/ln.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Linkedin</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-maps.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-maps.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Maps</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/google-photos.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/google-photos.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Photos</p>
                           </a></div>
-                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img src="../assets/img/nav-icons/spotify.webp" alt="" width="30" />
+                        <div class="col-4"><a class="d-block bg-body-secondary-hover p-2 rounded-3 text-center text-decoration-none mb-3" href="#!"><img :src="assetUrl('assets/img/nav-icons/spotify.webp')" alt="" width="30" />
                             <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1 pt-1">Spotify</p>
                           </a></div>
                       </div>
@@ -5865,7 +5879,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
               </li>
               <li class="nav-item dropdown"><a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
                   <div class="avatar avatar-l ">
-                    <img class="rounded-circle " src="../assets/img/team/40x40/57.webp" alt="" />
+                    <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/57.webp')" alt="" />
                   </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-profile shadow border" aria-labelledby="navbarDropdownUser">
@@ -5873,7 +5887,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <div class="card-body p-0">
                       <div class="text-center pt-4 pb-3">
                         <div class="avatar avatar-xl ">
-                          <img class="rounded-circle " src="../assets/img/team/72x72/57.webp" alt="" />
+                          <img class="rounded-circle " :src="assetUrl('assets/img/team/72x72/57.webp')" alt="" />
                         </div>
                         <h6 class="mt-2 text-body-emphasis">Jerry Seinfield</h6>
                       </div>
@@ -6963,7 +6977,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                           <div class="dropdown-menu dropdown-menu-end py-2"><a class="dropdown-item" href="#!">Edit</a><a class="dropdown-item text-danger" href="#!">Delete</a><a class="dropdown-item" href="#!">Download</a><a class="dropdown-item" href="#!">Report abuse</a></div>
                                         </div>
                                       </div>
-                                      <div class="d-flex fs-9 text-body-tertiary mb-2 flex-wrap"><span>768 kb</span><span class="text-body-quaternary mx-1">| </span><a href="#!">Shantinan Mekalan </a><span class="text-body-quaternary mx-1">| </span><span class="text-nowrap">21st Dec, 12:56 PM</span></div><img class="rounded-2" src="../assets/img/generic/40.png" alt="" style="width:230px" />
+                                      <div class="d-flex fs-9 text-body-tertiary mb-2 flex-wrap"><span>768 kb</span><span class="text-body-quaternary mx-1">| </span><a href="#!">Shantinan Mekalan </a><span class="text-body-quaternary mx-1">| </span><span class="text-nowrap">21st Dec, 12:56 PM</span></div><img class="rounded-2" :src="assetUrl('assets/img/generic/40.png')" alt="" style="width:230px" />
                                     </div>
                                   </div>
                                   <div class="border-top px-0 pt-4 pb-3">
@@ -7134,7 +7148,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <td class="align-middle white-space-nowrap assignees ps-3">
                           <div class="avatar-group avatar-group-dense"><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/9.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/9.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7144,7 +7158,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/9.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/9.webp')" alt="" /></div>
                                     <h6 class="text-white">Michael Jenkins</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7168,7 +7182,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/25.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/25.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7178,7 +7192,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/25.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/25.webp')" alt="" /></div>
                                     <h6 class="text-white">Ansolo Lazinatov</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7202,7 +7216,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/32.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/32.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7212,7 +7226,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/32.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/32.webp')" alt="" /></div>
                                     <h6 class="text-white">Jennifer Schramm</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7236,7 +7250,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle avatar-placeholder" src="../assets/img/team/avatar.webp" alt="" />
+                                <img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/avatar.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7246,7 +7260,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/avatar.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/avatar.webp')" alt="" /></div>
                                     <h6 class="text-white">Kristine Cadena</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7311,7 +7325,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <td class="align-middle white-space-nowrap assignees ps-3">
                           <div class="avatar-group avatar-group-dense"><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/22.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/22.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7321,7 +7335,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/22.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/22.webp')" alt="" /></div>
                                     <h6 class="text-white">Woodrow Burton</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7345,7 +7359,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/28.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/28.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7355,7 +7369,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/28.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/28.webp')" alt="" /></div>
                                     <h6 class="text-white">Ashley Garrett</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7450,7 +7464,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <td class="align-middle white-space-nowrap assignees ps-3">
                           <div class="avatar-group avatar-group-dense"><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/34.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/34.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7460,7 +7474,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/34.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/34.webp')" alt="" /></div>
                                     <h6 class="text-white">Jean Renoir</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7484,7 +7498,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/59.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/59.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7494,7 +7508,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/59.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/59.webp')" alt="" /></div>
                                     <h6 class="text-white">Katerina Karenin</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7556,7 +7570,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <td class="align-middle white-space-nowrap assignees ps-3">
                           <div class="avatar-group avatar-group-dense"><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/1.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/1.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7566,7 +7580,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/1.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/1.webp')" alt="" /></div>
                                     <h6 class="text-white">Luis Bunuel</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7590,7 +7604,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle avatar-placeholder" src="../assets/img/team/avatar.webp" alt="" />
+                                <img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/avatar.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7600,7 +7614,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/avatar.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/avatar.webp')" alt="" /></div>
                                     <h6 class="text-white">Kristine Cadena</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7624,7 +7638,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/5.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/5.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7634,7 +7648,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/5.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/5.webp')" alt="" /></div>
                                     <h6 class="text-white">Ricky Antony</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7658,7 +7672,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/11.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/11.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7668,7 +7682,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/11.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/11.webp')" alt="" /></div>
                                     <h6 class="text-white">Roy Anderson</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7727,7 +7741,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <td class="align-middle white-space-nowrap assignees ps-3">
                           <div class="avatar-group avatar-group-dense"><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/21.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/21.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7737,7 +7751,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/21.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/21.webp')" alt="" /></div>
                                     <h6 class="text-white">Michael Jenkins</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7761,7 +7775,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/23.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/23.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7771,7 +7785,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/23.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/23.webp')" alt="" /></div>
                                     <h6 class="text-white">Kristine Cadena</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7795,7 +7809,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/25.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/25.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7805,7 +7819,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/25.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/25.webp')" alt="" /></div>
                                     <h6 class="text-white">Ricky Antony</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7864,7 +7878,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         <td class="align-middle white-space-nowrap assignees ps-3">
                           <div class="avatar-group avatar-group-dense"><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/30.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/30.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7874,7 +7888,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/30.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/30.webp')" alt="" /></div>
                                     <h6 class="text-white">Stanly Drinkwater</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7898,7 +7912,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle avatar-placeholder" src="../assets/img/team/avatar.webp" alt="" />
+                                <img class="rounded-circle avatar-placeholder" :src="assetUrl('assets/img/team/avatar.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7908,7 +7922,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/avatar.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/avatar.webp')" alt="" /></div>
                                     <h6 class="text-white">Kristine Cadena</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7932,7 +7946,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/59.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/59.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7942,7 +7956,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/59.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/59.webp')" alt="" /></div>
                                     <h6 class="text-white">Katerina Karenin</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -7966,7 +7980,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                               <div class="p-3 d-flex justify-content-between"><a class="btn btn-link p-0 text-decoration-none" href="#!">Details </a><a class="btn btn-link p-0 text-decoration-none text-danger" href="#!">Unassign </a></div>
                             </div><a class="dropdown-toggle dropdown-caret-none d-inline-block" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                               <div class="avatar avatar-s  rounded-circle">
-                                <img class="rounded-circle " src="../assets/img/team/31.webp" alt="" />
+                                <img class="rounded-circle " :src="assetUrl('assets/img/team/31.webp')" alt="" />
                               </div>
                             </a>
                             <div class="dropdown-menu avatar-dropdown-menu p-0 overflow-hidden" style="width: 320px;">
@@ -7976,7 +7990,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                                 <div class="p-3">
                                   <div class="text-end"><button class="btn p-0 me-2"><span class="fa-solid fa-user-plus text-white"></span></button><button class="btn p-0"><span class="fa-solid fa-ellipsis text-white"></span></button></div>
                                   <div class="text-center">
-                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" src="../assets/img/team/31.webp" alt="" /></div>
+                                    <div class="avatar avatar-xl status-online position-relative me-2 me-sm-0 me-xl-2 mb-2"><img class="rounded-circle border border-light-subtle" :src="assetUrl('assets/img/team/31.webp')" alt="" /></div>
                                     <h6 class="text-white">Martina scorcese</h6>
                                     <p class="text-light text-opacity-50 fw-semibold fs-10 mb-2">@tyrion222</p>
                                     <div class="d-flex flex-center mb-3">
@@ -8124,14 +8138,14 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <hr class="my-0" />
                       <h6 class="dropdown-header text-body-highlight fs-9 border-bottom border-translucent py-2 lh-sm">Products</h6>
                       <div class="py-2"><a class="dropdown-item py-2 d-flex align-items-center" href="../apps/e-commerce/landing/product-details.html">
-                          <div class="file-thumbnail me-2"><img class="h-100 w-100 object-fit-cover rounded-3" src="../assets/img/products/60x60/3.png" alt="" /></div>
+                          <div class="file-thumbnail me-2"><img class="h-100 w-100 object-fit-cover rounded-3" :src="assetUrl('assets/img/products/60x60/3.png')" alt="" /></div>
                           <div class="flex-1">
                             <h6 class="mb-0 text-body-highlight title">MacBook Air - 13″</h6>
                             <p class="fs-10 mb-0 d-flex text-body-tertiary"><span class="fw-medium text-body-tertiary text-opactity-85">8GB Memory - 1.6GHz - 128GB Storage</span></p>
                           </div>
                         </a>
                         <a class="dropdown-item py-2 d-flex align-items-center" href="../apps/e-commerce/landing/product-details.html">
-                          <div class="file-thumbnail me-2"><img class="img-fluid" src="../assets/img/products/60x60/3.png" alt="" /></div>
+                          <div class="file-thumbnail me-2"><img class="img-fluid" :src="assetUrl('assets/img/products/60x60/3.png')" alt="" /></div>
                           <div class="flex-1">
                             <h6 class="mb-0 text-body-highlight title">MacBook Pro - 13″</h6>
                             <p class="fs-10 mb-0 d-flex text-body-tertiary"><span class="fw-medium text-body-tertiary text-opactity-85">30 Sep at 12:30 PM</span></p>
@@ -8173,7 +8187,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                       <h6 class="dropdown-header text-body-highlight fs-9 border-bottom border-translucent py-2 lh-sm">Members</h6>
                       <div class="py-2"><a class="dropdown-item py-2 d-flex align-items-center" href="../pages/members.html">
                           <div class="avatar avatar-l status-online  me-2 text-body">
-                            <img class="rounded-circle " src="../assets/img/team/40x40/10.webp" alt="" />
+                            <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/10.webp')" alt="" />
                           </div>
                           <div class="flex-1">
                             <h6 class="mb-0 text-body-highlight title">Carry Anna</h6>
@@ -8182,7 +8196,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                         </a>
                         <a class="dropdown-item py-2 d-flex align-items-center" href="../pages/members.html">
                           <div class="avatar avatar-l  me-2 text-body">
-                            <img class="rounded-circle " src="../assets/img/team/40x40/12.webp" alt="" />
+                            <img class="rounded-circle " :src="assetUrl('assets/img/team/40x40/12.webp')" alt="" />
                           </div>
                           <div class="flex-1">
                             <h6 class="mb-0 text-body-highlight title">John Smith</h6>
@@ -8235,7 +8249,7 @@ var navbarTopShape = window.config.config.phoenixNavbarTopShape;
                     <p class="mb-0 fw-semibold fs-9">My payment method not working</p><span class="fa-solid fa-paper-plane text-primary fs-9 ms-3"></span>
                   </a></div>
                 <div class="text-center mt-auto">
-                  <div class="avatar avatar-3xl status-online"><img class="rounded-circle border border-3 border-light-subtle" src="../assets/img/team/30.webp" alt="" /></div>
+                  <div class="avatar avatar-3xl status-online"><img class="rounded-circle border border-3 border-light-subtle" :src="assetUrl('assets/img/team/30.webp')" alt="" /></div>
                   <h5 class="mt-2 mb-3">Eric</h5>
                   <p class="text-center text-body-emphasis mb-0">Ask us anything – we’ll get back to you here or by email within 24 hours.</p>
                 </div>
