@@ -46,6 +46,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/portals/{portal}/support-session', [AdminPortalSupportController::class, 'start'])->name('portals.support.start');
         Route::get('/support-sessions/{supportSession}', [AdminPortalSupportController::class, 'show'])->name('support.show');
         Route::post('/support-sessions/{supportSession}/end', [AdminPortalSupportController::class, 'end'])->name('support.end');
+        Route::post('/support-sessions/{supportSession}/subscription/grace', [AdminPortalSupportController::class, 'requestGrace'])->name('support.grace.request');
+        Route::post('/support-sessions/{supportSession}/subscription/purchase', [AdminPortalSupportController::class, 'requestPurchase'])->name('support.purchase.request');
         Route::put('/portals/{portal}', [AdminPortalController::class, 'update'])->name('portals.update');
         Route::post('/portals/{portal}/toggle', [AdminPortalController::class, 'toggleStatus'])->name('portals.toggle');
         Route::post('/portals/{portal}/provision', [AdminPortalController::class, 'reprovision'])->name('portals.provision');

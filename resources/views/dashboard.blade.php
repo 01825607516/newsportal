@@ -43,7 +43,6 @@
 @endphp
 <style>
     .sub-toast { position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); z-index: 2100; width: min(34rem, 92vw); }
-    .admin-support-banner { position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); z-index: 2200; width: min(52rem, 92vw); }
     .portal-support-notice { position: fixed; top: 5rem; right: 1rem; z-index: 2200; width: min(36rem, calc(100vw - 2rem)); }
     .plan-card { cursor: pointer; display: block; border: 1px solid var(--phoenix-border-color); border-radius: .5rem; padding: .75rem 1rem; margin-bottom: .6rem; }
     .plan-card:hover { border-color: var(--phoenix-primary); }
@@ -111,10 +110,22 @@
     </div>
 
     <div id="sub-nav-right" class="d-flex align-items-center gap-2 me-2">
+        @if (!empty($adminSupportSession))
+            <span class="badge badge-phoenix badge-phoenix-warning text-nowrap d-none d-sm-inline-flex"
+                  title="Support for {{ $currentPortal->portal_name }} by {{ $supportAdmin->name }}. Billing requests require approval and are audited.">
+                <span class="fa-solid fa-headset me-1" aria-hidden="true"></span>Support · Write
+            </span>
+            <form method="POST" action="{{ route('admin.support.end', $adminSupportSession) }}" class="m-0">
+                @csrf
+                <button type="submit" class="btn btn-sm btn-warning text-nowrap"
+                        aria-label="End admin support session" title="End admin support session">
+                    <span class="fa-solid fa-right-from-bracket me-1" aria-hidden="true"></span>
+                    <span class="d-none d-lg-inline">End support</span>
+                </button>
+            </form>
+        @endif
         {{-- The Grace Period button lives in the "expiring soon" banner, which only shows inside the package's window. --}}
-        @unless ($adminSupport ?? false)
-            <button type="button" class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">Purchase</button>
-        @endunless
+        <button type="button" class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">Purchase</button>
     </div>
 
     <form id="sub-logout-form" method="POST" action="{{ ($adminSupport ?? false) ? route('admin.support.end', $adminSupportSession) : route('portal.logout') }}">@csrf</form>
@@ -149,26 +160,19 @@
 @endif
 
 @if (!empty($adminSupportSession))
-    <div class="admin-support-banner alert alert-subtle-warning d-flex flex-wrap justify-content-between align-items-center gap-3" role="status">
-        <div>
-            <strong>Admin support mode · read-only</strong><br>
-            You are viewing {{ $currentPortal->portal_name }} as {{ $supportAdmin->name }}. This session is audited.
-        </div>
-        <form method="POST" action="{{ route('admin.support.end', $adminSupportSession) }}">
-            @csrf
-            <button type="submit" class="btn btn-warning text-nowrap">End support session</button>
-        </form>
-    </div>
+    <span class="visually-hidden" role="status">
+        Write-enabled admin support session for {{ $currentPortal->portal_name }} opened by {{ $supportAdmin->name }}. Purchase and grace-period requests require approval and are audited.
+    </span>
 @endif
 
 @if (!empty($activeSupportSession))
     <div class="portal-support-notice alert alert-subtle-warning d-flex align-items-start gap-2" role="status">
         <span class="fa-solid fa-eye mt-1" aria-hidden="true"></span>
-        <div><strong>Admin support session active.</strong><br>{{ $activeSupportSession->admin_name }} is viewing this portal in read-only mode.</div>
+        <div><strong>Admin support session active.</strong><br>{{ $activeSupportSession->admin_name }} can submit purchase and grace-period requests. Actions are audited and require approval.</div>
     </div>
 @endif
 
-@if ($b && $b['banner']['show'] && !($adminSupport ?? false))
+@if ($b && $b['banner']['show'])
     @php
         $bInfo = $b['info'];
         $bSub = $bInfo['subscription'];
@@ -194,7 +198,6 @@
             <div class="sub-banner-bar" aria-hidden="true"><span style="width: {{ $bPct }}%"></span></div>
         </div>
 
-        @unless ($adminSupport ?? false)
         <div class="sub-banner-actions">
             @if ($b['grace']['can_request'] || $b['pendingGrace'])
                 <button type="button" class="btn btn-sm btn-phoenix-{{ $bTone }} px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#graceModal">
@@ -205,7 +208,6 @@
                 <span class="fa-regular fa-credit-card me-1"></span>Renew now
             </button>
         </div>
-        @endunless
 
         <button type="button" class="sub-banner-close" id="subscription-banner-close" aria-label="Dismiss" title="Dismiss">
             <span class="fa-solid fa-xmark"></span>
@@ -215,12 +217,12 @@
 
 <div id="app"></div>
 
-@if ($b && !($adminSupport ?? false))
+@if ($b)
 {{-- ============ Grace period popup ============ --}}
 <div class="modal fade" id="graceModal" tabindex="-1" aria-labelledby="graceModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form method="POST" action="{{ route('portal.grace.request') }}">
+            <form method="POST" action="{{ ($adminSupport ?? false) ? route('admin.support.grace.request', $adminSupportSession) : route('portal.grace.request') }}">
                 @csrf
                 <input type="hidden" name="_form" value="grace">
                 <div class="modal-header border-0 pb-0 align-items-start">
@@ -326,7 +328,7 @@
 <div class="modal fade" id="renewModal" tabindex="-1" aria-labelledby="renewModalTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form method="POST" action="{{ route('portal.purchase.request') }}" id="renewForm">
+            <form method="POST" action="{{ ($adminSupport ?? false) ? route('admin.support.purchase.request', $adminSupportSession) : route('portal.purchase.request') }}" id="renewForm">
                 @csrf
                 <input type="hidden" name="_form" value="renew">
                 <div class="modal-header">

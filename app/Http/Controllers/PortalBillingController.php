@@ -96,7 +96,10 @@ class PortalBillingController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('dashboard')->with('billing_success', 'Grace period request sent. You will be able to keep using the portal once the administrator approves it.');
+        return $this->requestSuccess(
+            $request,
+            'Grace period request sent. You will be able to keep using the portal once the administrator approves it.'
+        );
     }
 
     public function requestPurchase(Request $request, SubscriptionService $subs)
@@ -147,7 +150,20 @@ class PortalBillingController extends Controller
             'status' => 'pending',
         ]);
 
-        return redirect()->route('dashboard')->with('billing_success', 'Renewal request sent. Your plan is extended as soon as the administrator confirms your payment.');
+        return $this->requestSuccess(
+            $request,
+            'Renewal request sent. Your plan is extended as soon as the administrator confirms your payment.'
+        );
+    }
+
+    private function requestSuccess(Request $request, string $message)
+    {
+        $supportSession = $request->attributes->get('admin_support_session');
+        if ($supportSession instanceof PortalSupportSession) {
+            return redirect()->route('admin.support.show', $supportSession)->with('billing_success', $message);
+        }
+
+        return redirect()->route('dashboard')->with('billing_success', $message);
     }
 
     private function fail(string $field, string $message)

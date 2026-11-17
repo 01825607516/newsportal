@@ -18,9 +18,10 @@
   </div>
   <div class="d-flex flex-wrap gap-2">
     @if ($portal->isProvisioned())
-      <form method="POST" action="{{ route('admin.portals.support.start', $portal) }}">
+      <form method="POST" action="{{ route('admin.portals.support.start', $portal) }}"
+            data-confirm="Start an audited support session? You can submit purchase and grace-period requests, which still require approval.">
         @csrf
-        <button class="btn btn-phoenix-primary" type="submit">Open read-only support view</button>
+        <button class="btn btn-phoenix-primary" type="submit">Log in as admin</button>
       </form>
     @endif
     <form method="POST" action="{{ route('admin.portals.toggle', $portal) }}"
