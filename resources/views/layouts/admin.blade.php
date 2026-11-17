@@ -191,6 +191,7 @@
     </div>
 
     @if (session('success'))<div class="alert alert-subtle-success" role="alert">{{ session('success') }}</div>@endif
+    @if (session('warning'))<div class="alert alert-subtle-warning" role="alert">{{ session('warning') }}</div>@endif
     @if ($errors->any())<div class="alert alert-subtle-danger" role="alert">@foreach ($errors->all() as $e)<div>{{ $e }}</div>@endforeach</div>@endif
 
     @yield('content')
@@ -208,6 +209,27 @@
   </div>
 </main>
 
+<div class="modal fade" id="admin-confirm-modal" tabindex="-1" aria-labelledby="admin-confirm-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="admin-confirm-title">Confirm action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex align-items-start gap-3">
+          <span class="fa-solid fa-triangle-exclamation text-warning mt-1" aria-hidden="true"></span>
+          <p class="mb-0" id="admin-confirm-message"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="admin-confirm-submit">Continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="{{ asset('vendors/popper/popper.min.js') }}"></script>
 <script src="{{ asset('vendors/bootstrap/bootstrap.min.js') }}"></script>
 <script src="{{ asset('vendors/anchorjs/anchor.min.js') }}"></script>
@@ -218,6 +240,66 @@
 <script src="{{ asset('vendors/feather-icons/feather.min.js') }}"></script>
 <script src="{{ asset('vendors/dayjs/dayjs.min.js') }}"></script>
 <script src="{{ asset('assets/js/phoenix.js') }}"></script>
+<script>
+  (function () {
+    var modalElement = document.getElementById('admin-confirm-modal');
+    var modal = modalElement && window.bootstrap && window.bootstrap.Modal
+      ? window.bootstrap.Modal.getOrCreateInstance(modalElement)
+      : null;
+    var title = document.getElementById('admin-confirm-title');
+    var message = document.getElementById('admin-confirm-message');
+    var confirmButton = document.getElementById('admin-confirm-submit');
+    var pendingForm = null;
+    var pendingSubmitter = null;
+
+    if (!modalElement || !modal || !title || !message || !confirmButton) return;
+
+    document.addEventListener('submit', function (event) {
+      var form = event.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      if (form.dataset.confirmed === 'true') {
+        delete form.dataset.confirmed;
+        return;
+      }
+
+      var submitter = event.submitter || null;
+      var prompt = (submitter && submitter.getAttribute('data-confirm')) || form.getAttribute('data-confirm');
+      if (!prompt) return;
+
+      event.preventDefault();
+      pendingForm = form;
+      pendingSubmitter = submitter;
+      title.textContent = (submitter && submitter.getAttribute('data-confirm-title'))
+        || form.getAttribute('data-confirm-title')
+        || 'Confirm action';
+      message.textContent = prompt;
+      modal.show();
+    });
+
+    confirmButton.addEventListener('click', function () {
+      if (!pendingForm) return;
+
+      var form = pendingForm;
+      var submitter = pendingSubmitter;
+      pendingForm = null;
+      pendingSubmitter = null;
+      form.dataset.confirmed = 'true';
+      modal.hide();
+
+      if (typeof form.requestSubmit === 'function') {
+        if (submitter) form.requestSubmit(submitter);
+        else form.requestSubmit();
+      } else {
+        form.submit();
+      }
+    });
+
+    modalElement.addEventListener('hidden.bs.modal', function () {
+      pendingForm = null;
+      pendingSubmitter = null;
+    });
+  })();
+</script>
 @stack('scripts')
 </body>
 </html>

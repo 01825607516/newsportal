@@ -7,7 +7,7 @@
         @foreach ($alerts as $a)<div>• {{ $a['message'] }}</div>@endforeach
       </div>
       @if ($portal->isActive())
-        <form method="POST" action="{{ route('admin.portals.toggle', $portal) }}" onsubmit="return confirm('Suspend {{ addslashes($portal->portal_name) }}? The editor will be blocked from logging in.')">
+        <form method="POST" action="{{ route('admin.portals.toggle', $portal) }}" data-confirm="Suspend {{ $portal->portal_name }}? The editor will be blocked from logging in.">
           @csrf<button class="btn btn-danger" type="submit">Suspend portal</button>
         </form>
       @endif

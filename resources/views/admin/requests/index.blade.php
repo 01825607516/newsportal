@@ -60,7 +60,7 @@
           <div class="d-flex gap-2 mt-3">
             <button class="btn btn-success" type="submit">Approve &amp; record payment</button>
             <button class="btn btn-phoenix-danger" type="submit" formaction="{{ route('admin.requests.purchase.reject', $r) }}"
-                    onclick="return confirm('Reject this renewal request?')">Reject</button>
+                    data-confirm="Reject this renewal request?">Reject</button>
           </div>
           <div class="form-text mt-2">Approving records the payment and extends the subscription, exactly like "Record payment" in the Billing tab.</div>
         </form>
@@ -113,7 +113,7 @@
           <div class="d-flex gap-2 mt-3">
             <button class="btn btn-success" type="submit">Approve</button>
             <button class="btn btn-phoenix-danger" type="submit" formaction="{{ route('admin.requests.grace.reject', $r) }}"
-                    onclick="return confirm('Reject this grace period request?')">Reject</button>
+                    data-confirm="Reject this grace period request?">Reject</button>
           </div>
           <div class="form-text mt-2">You can change the date before approving. The portal can keep working until that day.</div>
         </form>

@@ -116,18 +116,29 @@
 </div>
 
 @if (session('billing_success'))
-    <div id="billing-success-toast" class="sub-toast alert alert-subtle-success alert-dismissible fade show" role="alert">
+    <div id="billing-success-toast" class="sub-toast auto-dismiss-toast alert alert-subtle-success alert-dismissible fade show" role="alert">
         {{ session('billing_success') }}
         <button type="button" class="btn-close" aria-label="Close" onclick="this.parentElement.remove()"></button>
     </div>
+@endif
+
+@if (session('warning'))
+    <div id="session-warning-toast" class="sub-toast auto-dismiss-toast alert alert-subtle-warning alert-dismissible fade show" role="alert">
+        {{ session('warning') }}
+        <button type="button" class="btn-close" aria-label="Close" onclick="this.parentElement.remove()"></button>
+    </div>
+@endif
+
+@if (session('billing_success') || session('warning'))
     <script>
       (function () {
-        var toast = document.getElementById('billing-success-toast');
-        window.setTimeout(function () {
-          if (!toast) return;
-          toast.classList.remove('show');
-          window.setTimeout(function () { toast.remove(); }, 200);
-        }, 5000);
+        document.querySelectorAll('.auto-dismiss-toast').forEach(function (toast) {
+          window.setTimeout(function () {
+            if (!toast.isConnected) return;
+            toast.classList.remove('show');
+            window.setTimeout(function () { toast.remove(); }, 200);
+          }, 5000);
+        });
       })();
     </script>
 @endif
@@ -396,7 +407,7 @@
     var banner = document.getElementById('subscription-banner');
     if (banner) {
         var closed = false;
-        var closedKey = 'subBannerClosed:' + @json(($b['info']['state'] ?? '') . ':' . ($b['info']['days_left'] ?? $b['info']['grace_days_left'] ?? ''));
+        var closedKey = 'subBannerClosed:' + @json(session('portal_login_key', 'legacy')) + ':' + @json(($b['info']['state'] ?? '') . ':' . ($b['info']['days_left'] ?? $b['info']['grace_days_left'] ?? ''));
         try { closed = sessionStorage.getItem(closedKey) === '1'; } catch (e) {}
         var closeBtn = document.getElementById('subscription-banner-close');
         if (closeBtn) closeBtn.addEventListener('click', function () {

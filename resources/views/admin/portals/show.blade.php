@@ -17,7 +17,7 @@
     </div>
   </div>
   <form method="POST" action="{{ route('admin.portals.toggle', $portal) }}"
-        @if ($portal->isActive()) onsubmit="return confirm('Suspend this portal? The editor will be blocked from logging in.')" @endif>
+        @if ($portal->isActive()) data-confirm="Suspend this portal? The editor will be blocked from logging in." @endif>
     @csrf
     <button class="btn btn-{{ $portal->isActive() ? 'warning' : 'success' }}" type="submit">{{ $portal->isActive() ? 'Suspend portal' : 'Activate portal' }}</button>
   </form>
@@ -84,7 +84,7 @@
       <h5 class="mb-2 text-danger">Danger zone</h5>
       <p class="fs-9 text-body-tertiary">Deleting removes the portal and drops its tenant database. This cannot be undone.</p>
       <form method="POST" action="{{ route('admin.portals.destroy', $portal) }}"
-            onsubmit="return confirm('This permanently deletes the portal AND its database. Continue?')">
+            data-confirm="This permanently deletes the portal AND its database. Continue?">
         @csrf @method('DELETE')
         <button class="btn btn-danger" type="submit">Delete portal &amp; database</button>
       </form>

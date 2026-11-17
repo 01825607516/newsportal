@@ -52,6 +52,15 @@
     <span id="themeSwitchIcon">&#9790;</span>
 </button>
 
+@if (session('warning'))
+<div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 20; width: min(38rem, 100%);">
+    <div class="alert alert-subtle-warning alert-dismissible fade show mb-0" role="alert">
+        {{ session('warning') }}
+        <button type="button" class="btn-close" aria-label="Close" onclick="this.parentElement.remove()"></button>
+    </div>
+</div>
+@endif
+
 @yield('body')
 
 <script>

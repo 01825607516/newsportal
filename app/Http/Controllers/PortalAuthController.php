@@ -9,6 +9,7 @@ use App\Services\TenantProvisioner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Throwable;
 
 class PortalAuthController extends Controller
@@ -205,6 +206,7 @@ class PortalAuthController extends Controller
 
         $request->session()->regenerate();
         $request->session()->put('portal_id', $portal->id);
+        $request->session()->put('portal_login_key', (string) Str::uuid());
         $monitor->log($request, $portal, 'login', 302);
 
         return redirect()->route('dashboard');

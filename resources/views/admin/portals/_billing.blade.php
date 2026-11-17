@@ -115,7 +115,7 @@
               @else<span class="badge badge-phoenix badge-phoenix-warning">due</span>@endif
             </td>
             <td class="text-end">
-              <form method="POST" action="{{ route('admin.portals.charges.destroy', [$portal, $c]) }}" onsubmit="return confirm('Remove this charge?')">
+              <form method="POST" action="{{ route('admin.portals.charges.destroy', [$portal, $c]) }}" data-confirm="Remove this charge?">
                 @csrf @method('DELETE')<button class="btn btn-sm btn-link text-danger p-0" type="submit">remove</button>
               </form>
             </td>

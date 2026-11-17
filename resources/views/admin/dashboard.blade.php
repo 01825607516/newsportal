@@ -29,7 +29,7 @@
       </div>
       <div class="d-flex gap-2">
         <a class="btn btn-sm btn-phoenix-secondary" href="{{ route('admin.portals.show', [$f['portal'], 'tab' => 'activity']) }}">Review</a>
-        <form method="POST" action="{{ route('admin.portals.toggle', $f['portal']) }}" onsubmit="return confirm('Suspend this portal?')">
+        <form method="POST" action="{{ route('admin.portals.toggle', $f['portal']) }}" data-confirm="Suspend this portal?">
           @csrf<button class="btn btn-sm btn-danger" type="submit">Suspend</button>
         </form>
       </div>

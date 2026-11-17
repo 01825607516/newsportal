@@ -19,14 +19,30 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // A dashboard left open longer than the session lifetime fails the CSRF check (419) when the
-        // person clicks Sign out. Logging out is what they wanted anyway, so go to the login page.
         $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
-            if ($e->getStatusCode() === 419 && $request->routeIs('portal.logout')) {
-                $request->session()->forget('portal_id');
-
-                return redirect()->route('portal.login');
+            if ($e->getStatusCode() !== 419 || $request->expectsJson()) {
+                return null;
             }
+
+            if ($request->routeIs('portal.logout')) {
+                $request->session()->forget('portal_id');
+                $fallback = route('portal.login');
+            } elseif ($request->routeIs('admin.logout')) {
+                $request->session()->forget('admin_id');
+                $fallback = route('admin.login');
+            } elseif ($request->is('admin', 'admin/*')) {
+                $fallback = route($request->session()->has('admin_id') ? 'admin.dashboard' : 'admin.login');
+            } else {
+                $fallback = route($request->session()->has('portal_id') ? 'dashboard' : 'portal.login');
+            }
+
+            $request->session()->regenerateToken();
+            $referer = $request->headers->get('referer');
+            $sameOriginReferer = $referer
+                && str_starts_with($referer, $request->getSchemeAndHttpHost() . '/');
+
+            return redirect()->to($sameOriginReferer ? $referer : $fallback)
+                ->with('warning', 'This page security token is out of date. Your request was not processed; please review your changes and try again.');
         });
     })
     ->create();
