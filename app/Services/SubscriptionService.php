@@ -167,7 +167,7 @@ class SubscriptionService
 
         if (!$sub) {
             return ['state' => 'none', 'subscription' => null, 'days_left' => null, 'grace_days_left' => null,
-                    'grace_ends_at' => null, 'due_months' => 0];
+                    'grace_ends_at' => null, 'due_months' => 0, 'window_days' => null];
         }
 
         $today = today();
@@ -193,6 +193,8 @@ class SubscriptionService
             'grace_days_left' => $graceLeft,
             'grace_ends_at' => $graceEnds,
             'due_months' => $this->dueMonths($sub),
+            // The "expiring soon" banner and the Grace Period option open when this many days (or fewer) are left.
+            'window_days' => max(1, (int) ($sub->package?->grace_window_days ?? config('billing.warn_days'))),
         ];
     }
 

@@ -24,6 +24,11 @@ class EnsureAdminAuthenticated
         view()->share('pendingRequestCount',
             GraceRequest::where('status', 'pending')->count() + PurchaseRequest::where('status', 'pending')->count());
 
-        return $next($request);
+        $response = $next($request);
+
+        // Never let the browser cache admin pages: after logout the Back button must not show them again.
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+
+        return $response;
     }
 }

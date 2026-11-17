@@ -23,7 +23,7 @@
     </div>
     <div class="portal-status-filter">
       <label class="visually-hidden" for="portal-status">Filter by status</label>
-      <select class="form-select" id="portal-status" name="status">
+      <select class="form-select" id="portal-status" name="status" onchange="this.form.submit()">
         <option value="">All statuses</option>
         <option value="active" @selected($status === 'active')>Active</option>
         <option value="suspended" @selected($status === 'suspended')>Suspended</option>

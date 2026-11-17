@@ -25,5 +25,8 @@
     "sort-packages": true
   },
   "minimum-stability": "stable",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "laravel/tinker": "^3.1"
+  }
 }

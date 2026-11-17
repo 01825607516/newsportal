@@ -103,6 +103,7 @@ class BillingController extends Controller
             'duration_days' => ['required', 'integer', 'min:1', 'max:3650'],
             'term_months' => ['required', 'integer', 'min:1', 'max:60'],
             'grace_days' => ['required', 'integer', 'min:0', 'max:365'],
+            'grace_window_days' => ['required', 'integer', 'min:1', 'max:365'],
         ]);
 
         $slug = Str::slug($data['name']) ?: 'package';
@@ -123,11 +124,12 @@ class BillingController extends Controller
             'duration_days' => ['required', 'integer', 'min:1', 'max:3650'],
             'term_months' => ['sometimes', 'integer', 'min:1', 'max:60'],
             'grace_days' => ['required', 'integer', 'min:0', 'max:365'],
+            'grace_window_days' => ['required', 'integer', 'min:1', 'max:365'],
         ]);
         $data['active'] = $request->boolean('active');
 
         $package->update($data);
 
-        return back()->with('success', "{$package->name} updated. Running subscriptions keep their old terms.");
+        return back()->with('success', "{$package->name} updated. Running subscriptions keep their old terms (the grace option window applies right away).");
     }
 }

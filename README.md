@@ -21,7 +21,7 @@ Phoenix files remain under `v1.23.0/`; the build script copies `assets/` and `ve
 
 ## Multi-tenant database (one MySQL database per portal)
 
-On a portal's first login `TenantProvisioner` creates `<TENANT_DB_PREFIX><portal id>`, imports
+When a portal signs up (`/signup`) `TenantProvisioner` creates `<TENANT_DB_PREFIX><portal id>`, imports
 `database/tenant/schema.sql`, applies `database/tenant/migrations/*.sql`, (re)creates the views in
 `database/tenant/views.sql` and seeds the first rows via `App\Services\TenantSeeder`.
 

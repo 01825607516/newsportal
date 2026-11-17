@@ -13,14 +13,15 @@
   <form method="POST" action="{{ route('admin.packages.store') }}">
     @csrf
     <div class="row g-3">
-      <div class="col-lg-3"><label class="form-label">Name</label><input class="form-control" name="name" placeholder="e.g. Yearly Plan" value="{{ old('name') }}" required></div>
+      <div class="col-lg-2"><label class="form-label">Name</label><input class="form-control" name="name" placeholder="e.g. Yearly Plan" value="{{ old('name') }}" required></div>
       <div class="col-lg-2"><label class="form-label">Charge per month (tk)</label><input class="form-control" type="number" step="0.01" min="0" name="price" value="{{ old('price') }}" required></div>
       <div class="col-lg-2"><label class="form-label">Days in a month cycle</label><input class="form-control" type="number" min="1" name="duration_days" value="{{ old('duration_days', 30) }}" required></div>
-      <div class="col-lg-2"><label class="form-label">Term (months)</label><input class="form-control" type="number" min="1" name="term_months" value="{{ old('term_months', 1) }}" required></div>
+      <div class="col-lg-1"><label class="form-label">Term (months)</label><input class="form-control" type="number" min="1" name="term_months" value="{{ old('term_months', 1) }}" required></div>
       <div class="col-lg-2"><label class="form-label">Grace (days)</label><input class="form-control" type="number" min="0" name="grace_days" value="{{ old('grace_days', 5) }}" required></div>
+      <div class="col-lg-2"><label class="form-label">Grace option opens (days left)</label><input class="form-control" type="number" min="1" max="365" name="grace_window_days" value="{{ old('grace_window_days', 7) }}" required></div>
       <div class="col-lg-1 d-flex align-items-end"><button class="btn btn-primary w-100" type="submit">Add</button></div>
     </div>
-    <div class="form-text mt-2">Term 1 = monthly plan, 12 = yearly plan paid monthly.</div>
+    <div class="form-text mt-2">Term 1 = monthly plan, 12 = yearly plan paid monthly. <b>Grace option opens</b>: the portal sees the "Subscription expiring soon" banner with the Grace Period button only when this many days (or fewer) are left.</div>
   </form>
 </div></div>
 
@@ -44,6 +45,11 @@
             <div class="col-md-3"><label class="form-label">Term (months)</label><input class="form-control" type="number" min="1" name="term_months" value="{{ $pkg->term_months }}" required></div>
           @endunless
           <div class="col-md-{{ $pkg->is_trial ? 4 : 3 }}"><label class="form-label">Grace (days)</label><input class="form-control" type="number" min="0" name="grace_days" value="{{ $pkg->grace_days }}" required></div>
+          <div class="col-md-6">
+            <label class="form-label">Grace option opens (days left)</label>
+            <input class="form-control" type="number" min="1" max="365" name="grace_window_days" value="{{ $pkg->grace_window_days }}" required>
+            <div class="form-text">Banner + Grace Period button show when this many days or fewer are left. Applies to running subscriptions too.</div>
+          </div>
           <div class="col-12">
             <div class="form-check"><input class="form-check-input" type="checkbox" name="active" value="1" id="active{{ $pkg->id }}" @checked($pkg->active)><label class="form-check-label" for="active{{ $pkg->id }}">Active (available to assign)</label></div>
           </div>

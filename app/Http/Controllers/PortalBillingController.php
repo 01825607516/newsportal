@@ -33,6 +33,11 @@ class PortalBillingController extends Controller
             return $this->fail('until_date', 'No running subscription found.');
         }
 
+        // The grace period can only be asked for in the last N days of the paid period (or once it is overdue).
+        if ($info['state'] === 'active' && $info['days_left'] > $info['window_days']) {
+            return $this->fail('until_date', "You can request a grace period only during the last {$info['window_days']} day(s) of your subscription.");
+        }
+
         if ($portal->graceRequests()->where('status', 'pending')->exists()) {
             return $this->fail('until_date', 'You already have a grace period request waiting for approval.');
         }
@@ -129,18 +134,22 @@ class PortalBillingController extends Controller
         if ($sub) {
             if ($info['state'] === 'grace') {
                 $showBanner = true;
-                $message = "Subscription expired! Your grace period ends in {$info['grace_days_left']} day(s), after that access stops.";
-            } elseif ($info['state'] === 'active' && $info['days_left'] <= (int) config('billing.warn_days')) {
+                $message = "Your grace period ends in {$info['grace_days_left']} day(s). After that, access stops.";
+            } elseif ($info['state'] === 'active' && $info['days_left'] <= $info['window_days']) {
                 $showBanner = true;
-                $message = "Your subscription will expire in {$info['days_left']} day(s).";
+                $message = $info['days_left'] <= 1
+                    ? 'Your subscription will expire today.'
+                    : "Your subscription will expire in {$info['days_left']} day(s).";
             }
         }
 
+        // Grace option: only inside the package's window (last N days, or already overdue).
         $grace = ['can_request' => false, 'min' => null, 'max' => null];
         if ($sub && in_array($info['state'], ['active', 'grace'], true)) {
             $min = $info['grace_ends_at']->copy()->addDay();
             $max = $sub->ends_at->copy()->addDays((int) config('billing.max_grace_days'));
-            $grace = ['can_request' => $min->lte($max), 'min' => $min, 'max' => $max];
+            $inWindow = $info['state'] === 'grace' || $info['days_left'] <= $info['window_days'];
+            $grace = ['can_request' => $inWindow && $min->lte($max), 'min' => $min, 'max' => $max];
         }
 
         $extras = $subs->extrasBreakdown($portal);

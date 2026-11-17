@@ -43,6 +43,11 @@ class EnsurePortalAuthenticated
         $request->attributes->set('portal', $portal);
         view()->share('currentPortal', $portal);
 
-        return $next($request);
+        $response = $next($request);
+
+        // Never let the browser cache portal pages: after logout the Back button must not show the old dashboard.
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+
+        return $response;
     }
 }

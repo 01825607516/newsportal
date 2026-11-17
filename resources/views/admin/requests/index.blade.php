@@ -5,10 +5,29 @@
 @section('content')
 @php($methods = config('billing.methods'))
 
+<form method="GET" class="card mb-3" role="search">
+  <div class="card-body d-flex flex-column flex-sm-row gap-2">
+    <div class="flex-grow-1">
+      <label class="visually-hidden" for="request-search">Search pending requests</label>
+      <input class="form-control" id="request-search" type="search" name="q" value="{{ $q }}" placeholder="Find pending requests by portal, mobile, or email">
+    </div>
+    <button class="btn btn-primary px-4" type="submit">Search</button>
+    @if ($q)
+      <a class="btn btn-phoenix-secondary" href="{{ route('admin.requests.index') }}">Clear</a>
+    @endif
+  </div>
+</form>
+
+<nav class="d-flex flex-wrap gap-2 mb-4" aria-label="Request sections">
+  <a class="btn btn-phoenix-secondary" href="#renewal-requests">Renewals <span class="badge badge-phoenix badge-phoenix-warning ms-1">{{ $pendingPurchases->total() }}</span></a>
+  <a class="btn btn-phoenix-secondary" href="#grace-requests">Grace periods <span class="badge badge-phoenix badge-phoenix-warning ms-1">{{ $pendingGraces->total() }}</span></a>
+  <a class="btn btn-phoenix-secondary" href="#request-history">Recently handled</a>
+</nav>
+
 {{-- ================= Renewal / purchase ================= --}}
-<div class="d-flex align-items-center gap-2 mb-3">
+<div id="renewal-requests" class="d-flex align-items-center gap-2 mb-3">
   <h4 class="mb-0">Renewal requests</h4>
-  <span class="badge badge-phoenix badge-phoenix-{{ $pendingPurchases->count() ? 'warning' : 'secondary' }}">{{ $pendingPurchases->count() }} pending</span>
+  <span class="badge badge-phoenix badge-phoenix-{{ $pendingPurchases->total() ? 'warning' : 'secondary' }}">{{ $pendingPurchases->total() }} pending</span>
 </div>
 
 @forelse ($pendingPurchases as $r)
@@ -49,13 +68,19 @@
     </div>
   </div></div>
 @empty
-  <div class="card mb-3"><div class="card-body text-body-tertiary">No pending renewal requests.</div></div>
+  <div class="card mb-3"><div class="card-body text-body-tertiary">{{ $q ? 'No pending renewal requests match your search.' : 'No pending renewal requests.' }}</div></div>
 @endforelse
+@if ($pendingPurchases->hasPages())
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <span class="small text-body-tertiary">Showing {{ $pendingPurchases->firstItem() }}–{{ $pendingPurchases->lastItem() }} of {{ $pendingPurchases->total() }} renewal requests</span>
+    {{ $pendingPurchases->links('pagination::bootstrap-5') }}
+  </div>
+@endif
 
 {{-- ================= Grace period ================= --}}
-<div class="d-flex align-items-center gap-2 mb-3 mt-5">
+<div id="grace-requests" class="d-flex align-items-center gap-2 mb-3 mt-5">
   <h4 class="mb-0">Grace period requests</h4>
-  <span class="badge badge-phoenix badge-phoenix-{{ $pendingGraces->count() ? 'warning' : 'secondary' }}">{{ $pendingGraces->count() }} pending</span>
+  <span class="badge badge-phoenix badge-phoenix-{{ $pendingGraces->total() ? 'warning' : 'secondary' }}">{{ $pendingGraces->total() }} pending</span>
 </div>
 
 @forelse ($pendingGraces as $r)
@@ -96,15 +121,33 @@
     </div>
   </div></div>
 @empty
-  <div class="card mb-3"><div class="card-body text-body-tertiary">No pending grace period requests.</div></div>
+  <div class="card mb-3"><div class="card-body text-body-tertiary">{{ $q ? 'No pending grace period requests match your search.' : 'No pending grace period requests.' }}</div></div>
 @endforelse
+@if ($pendingGraces->hasPages())
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+    <span class="small text-body-tertiary">Showing {{ $pendingGraces->firstItem() }}–{{ $pendingGraces->lastItem() }} of {{ $pendingGraces->total() }} grace period requests</span>
+    {{ $pendingGraces->links('pagination::bootstrap-5') }}
+  </div>
+@endif
 
 {{-- ================= History ================= --}}
-<h4 class="mb-3 mt-5">Recently handled</h4>
+<h4 id="request-history" class="mb-3 mt-5">Recently handled</h4>
 <div class="row g-4">
   <div class="col-xl-6">
     <div class="card">
-      <div class="card-header"><h5 class="mb-0">Renewals</h5></div>
+      <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="mb-0">Renewals</h5>
+        <form method="GET" class="d-flex align-items-center gap-2">
+          @if ($q)<input type="hidden" name="q" value="{{ $q }}">@endif
+          <input type="hidden" name="grace_status" value="{{ $graceStatus }}">
+          <label class="visually-hidden" for="renewal-history-status">Filter renewals by status</label>
+          <select class="form-select form-select-sm" id="renewal-history-status" name="renewal_status" onchange="this.form.submit()">
+            <option value="">All statuses</option>
+            <option value="approved" @selected($renewalStatus === 'approved')>Approved</option>
+            <option value="rejected" @selected($renewalStatus === 'rejected')>Rejected</option>
+          </select>
+        </form>
+      </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0 align-middle">
           <thead><tr><th>Portal</th><th>Plan</th><th>Amount</th><th>Status</th><th>When</th></tr></thead>
@@ -127,7 +170,19 @@
   </div>
   <div class="col-xl-6">
     <div class="card">
-      <div class="card-header"><h5 class="mb-0">Grace periods</h5></div>
+      <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="mb-0">Grace periods</h5>
+        <form method="GET" class="d-flex align-items-center gap-2">
+          @if ($q)<input type="hidden" name="q" value="{{ $q }}">@endif
+          <input type="hidden" name="renewal_status" value="{{ $renewalStatus }}">
+          <label class="visually-hidden" for="grace-history-status">Filter grace periods by status</label>
+          <select class="form-select form-select-sm" id="grace-history-status" name="grace_status" onchange="this.form.submit()">
+            <option value="">All statuses</option>
+            <option value="approved" @selected($graceStatus === 'approved')>Approved</option>
+            <option value="rejected" @selected($graceStatus === 'rejected')>Rejected</option>
+          </select>
+        </form>
+      </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0 align-middle">
           <thead><tr><th>Portal</th><th>Asked until</th><th>Granted until</th><th>Status</th><th>When</th></tr></thead>

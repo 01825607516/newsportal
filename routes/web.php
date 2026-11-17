@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BillingController as AdminBillingController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\PortalController as AdminPortalController;
 use App\Http\Controllers\Admin\RequestController as AdminRequestController;
+use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\PortalAuthController;
 use App\Http\Controllers\PortalBillingController;
 use Illuminate\Support\Facades\Route;
@@ -13,7 +14,12 @@ use Illuminate\Support\Facades\Route;
 // ---------- Portal (tenant) side ----------
 Route::get('/login', [PortalAuthController::class, 'showLogin'])->name('portal.login');
 Route::post('/login', [PortalAuthController::class, 'login'])->name('portal.login.submit');
+Route::get('/signup', [PortalAuthController::class, 'showSignup'])->name('portal.signup');
+Route::post('/signup', [PortalAuthController::class, 'signup'])->name('portal.signup.submit');
 Route::post('/logout', [PortalAuthController::class, 'logout'])->name('portal.logout');
+// Logging out is POST only. Opening /logout as a normal page (typed, bookmarked, restored by Back/Forward)
+// just goes to the dashboard, which sends visitors who are not logged in to the login page.
+Route::get('/logout', FallbackController::class);
 
 Route::middleware(['portal.auth', 'portal.log'])->group(function () {
     Route::get('/', [PortalBillingController::class, 'dashboard'])->name('dashboard');
@@ -27,6 +33,7 @@ Route::middleware(['portal.auth', 'portal.log'])->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+    Route::get('/logout', FallbackController::class);
 
     Route::middleware('admin.auth')->group(function () {
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
@@ -57,3 +64,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/packages/{package}', [AdminBillingController::class, 'updatePackage'])->name('packages.update');
     });
 });
+
+// ---------- Anything else ----------
+// An address that does not exist lands on the right home page instead of a 404 error page (see FallbackController).
+Route::fallback(FallbackController::class);

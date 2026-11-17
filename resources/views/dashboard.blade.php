@@ -48,6 +48,42 @@
     .plan-card:has(input:checked) { border-color: var(--phoenix-primary); background: var(--phoenix-primary-bg-subtle); }
     .plan-price { font-size: 1.15rem; font-weight: 800; }
     .plan-price small { font-weight: 400; font-size: .8rem; color: var(--phoenix-tertiary-color); }
+
+    /* ---- "expiring soon" banner ---- */
+    .sub-banner { position: relative; flex-wrap: wrap; padding: 1rem 3rem 1rem 1.1rem; border: 1px solid var(--sb-border); border-left: 4px solid var(--sb-accent); border-radius: .75rem; background: var(--sb-bg); box-shadow: 0 1px 2px rgba(0, 0, 0, .04); }
+    .sub-banner-warning { --sb-accent: var(--phoenix-warning, #e5780b); --sb-bg: var(--phoenix-warning-bg-subtle, #fff4e0); --sb-border: var(--phoenix-warning-border-subtle, #ffd9a8); }
+    .sub-banner-danger { --sb-accent: var(--phoenix-danger, #d9322f); --sb-bg: var(--phoenix-danger-bg-subtle, #fde8e8); --sb-border: var(--phoenix-danger-border-subtle, #f7c1c0); }
+    .sub-banner-icon { flex: none; width: 2.6rem; height: 2.6rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.05rem; color: var(--sb-accent); background: var(--phoenix-card-bg, #fff); box-shadow: 0 0 0 1px var(--sb-border); }
+    .sub-banner-body { flex: 1 1 18rem; min-width: 0; }
+    .sub-banner-title { font-weight: 800; line-height: 1.3; color: var(--phoenix-emphasis-color, inherit); }
+    .sub-banner-text { margin-top: .1rem; font-size: .875rem; color: var(--phoenix-body-color); }
+    .sub-banner-meta { display: inline-block; margin-left: .35rem; color: var(--phoenix-tertiary-color); }
+    .sub-banner-bar { max-width: 22rem; height: 4px; margin-top: .6rem; overflow: hidden; border-radius: 4px; background: color-mix(in srgb, var(--sb-accent) 20%, transparent); }
+    .sub-banner-bar span { display: block; height: 100%; border-radius: 4px; background: var(--sb-accent); }
+    .sub-banner-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .sub-banner-close { position: absolute; top: .65rem; right: .65rem; width: 1.8rem; height: 1.8rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--phoenix-tertiary-color); font-size: .95rem; line-height: 1; }
+    .sub-banner-close:hover { background: color-mix(in srgb, var(--sb-accent) 15%, transparent); color: var(--phoenix-emphasis-color, inherit); }
+    @media (max-width: 575.98px) {
+        .sub-banner { padding-right: 2.75rem; }
+        .sub-banner-actions { width: 100%; }
+        .sub-banner-actions .btn { flex: 1 1 auto; }
+    }
+
+    /* ---- grace period popup ---- */
+    .grace-icon { flex: none; width: 2.75rem; height: 2.75rem; display: flex; align-items: center; justify-content: center; border-radius: .75rem; font-size: 1.1rem; color: var(--phoenix-primary); background: var(--phoenix-primary-bg-subtle); }
+    .grace-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: .5rem; }
+    .grace-tile { padding: .55rem .75rem; border: 1px solid var(--phoenix-border-color); border-radius: .6rem; }
+    .grace-tile small { display: block; font-size: .68rem; letter-spacing: .04em; text-transform: uppercase; color: var(--phoenix-tertiary-color); }
+    .grace-tile strong { font-size: .875rem; color: var(--phoenix-emphasis-color, inherit); }
+    .grace-chip { padding: .2rem .8rem; border: 1px solid var(--phoenix-border-color); border-radius: 999px; background: var(--phoenix-card-bg, transparent); color: var(--phoenix-body-color); font-size: .78rem; line-height: 1.5; cursor: pointer; }
+    .grace-chip:hover, .grace-chip.active { border-color: var(--phoenix-primary); background: var(--phoenix-primary-bg-subtle); color: var(--phoenix-primary); }
+    .grace-until-note { min-height: 1.25rem; margin-top: .4rem; font-size: .8rem; font-weight: 600; color: var(--phoenix-primary); }
+    .grace-status { display: flex; gap: .75rem; padding: .9rem 1rem; border: 1px solid var(--gs-border); border-radius: .75rem; background: var(--gs-bg); }
+    .grace-status-icon { flex: none; margin-top: .15rem; color: var(--gs-accent); }
+    .grace-status-info { --gs-accent: var(--phoenix-info, #0097eb); --gs-bg: var(--phoenix-info-bg-subtle, #e5f4fd); --gs-border: var(--phoenix-info-border-subtle, #b3e0f9); }
+    .grace-status-warning { --gs-accent: var(--phoenix-warning, #e5780b); --gs-bg: var(--phoenix-warning-bg-subtle, #fff4e0); --gs-border: var(--phoenix-warning-border-subtle, #ffd9a8); }
+    .grace-status-success { --gs-accent: var(--phoenix-success, #25b003); --gs-bg: var(--phoenix-success-bg-subtle, #e8f7e4); --gs-border: var(--phoenix-success-border-subtle, #b9e5ad); }
+    .grace-status-danger { --gs-accent: var(--phoenix-danger, #d9322f); --gs-bg: var(--phoenix-danger-bg-subtle, #fde8e8); --gs-border: var(--phoenix-danger-border-subtle, #f7c1c0); }
 </style>
 
 {{-- These two blocks are moved into the Phoenix top navbar by the script at the bottom. --}}
@@ -57,7 +93,7 @@
     @php
         $subState = $subscriptionInfo['state'] ?? null;
         $subDays = $subscriptionInfo['days_left'] ?? null;
-        $subTone = $subState === 'grace' ? 'danger' : (($subDays !== null && $subDays <= (int) config('billing.warn_days')) ? 'warning' : 'primary');
+        $subTone = $subState === 'grace' ? 'danger' : (($subDays !== null && $subDays <= (int) ($subscriptionInfo['window_days'] ?? config('billing.warn_days'))) ? 'warning' : 'primary');
     @endphp
     <div id="sub-nav-left" class="d-none d-lg-flex align-items-center flex-nowrap ms-1">
         @if ($subState === 'grace')
@@ -72,11 +108,7 @@
     </div>
 
     <div id="sub-nav-right" class="d-flex align-items-center gap-2 me-2">
-        @if ($b)
-            <button type="button" class="btn btn-sm btn-outline-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#graceModal">
-                {{ $b['pendingGrace'] ? 'Grace Requested' : 'Grace Period' }}
-            </button>
-        @endif
+        {{-- The Grace Period button lives in the "expiring soon" banner, which only shows inside the package's window. --}}
         <button type="button" class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">Purchase</button>
     </div>
 
@@ -84,29 +116,62 @@
 </div>
 
 @if (session('billing_success'))
-    <div class="sub-toast alert alert-subtle-success alert-dismissible" role="alert">
+    <div id="billing-success-toast" class="sub-toast alert alert-subtle-success alert-dismissible fade show" role="alert">
         {{ session('billing_success') }}
         <button type="button" class="btn-close" aria-label="Close" onclick="this.parentElement.remove()"></button>
     </div>
+    <script>
+      (function () {
+        var toast = document.getElementById('billing-success-toast');
+        window.setTimeout(function () {
+          if (!toast) return;
+          toast.classList.remove('show');
+          window.setTimeout(function () { toast.remove(); }, 200);
+        }, 5000);
+      })();
+    </script>
 @endif
 
 @if ($b && $b['banner']['show'])
-    <div id="subscription-banner" class="alert alert-subtle-{{ $b['banner']['is_grace'] ? 'danger' : 'warning' }} flex-wrap align-items-center justify-content-between gap-2 mb-4 d-none" role="alert">
-        <div class="d-flex align-items-center">
-            <span class="fa-solid fa-triangle-exclamation me-2"></span>
-            <span><strong>{{ $b['banner']['is_grace'] ? 'Subscription Expired!' : 'Subscription Expiring Soon!' }}</strong> {{ $b['banner']['message'] }}</span>
+    @php
+        $bInfo = $b['info'];
+        $bSub = $bInfo['subscription'];
+        $bGrace = $b['banner']['is_grace'];
+        $bTone = $bGrace ? 'danger' : 'warning';
+        // how much of the warning period is still left (the bar shrinks day by day)
+        $bTotal = max(1, $bGrace ? (int) $bSub->grace_days : (int) $bInfo['window_days']);
+        $bLeft = (int) ($bGrace ? $bInfo['grace_days_left'] : $bInfo['days_left']);
+        $bPct = max(5, min(100, (int) round($bLeft / $bTotal * 100)));
+    @endphp
+    <div id="subscription-banner" class="sub-banner sub-banner-{{ $bTone }} align-items-center gap-3 mb-4 d-none" role="alert">
+        <div class="sub-banner-icon"><span class="fa-solid fa-{{ $bGrace ? 'circle-exclamation' : 'hourglass-half' }}"></span></div>
+
+        <div class="sub-banner-body">
+            <div class="sub-banner-title">{{ $bGrace ? 'Subscription expired' : 'Subscription expiring soon' }}</div>
+            <div class="sub-banner-text">
+                {{ $b['banner']['message'] }}
+                <span class="sub-banner-meta">
+                    {{ $bSub->package->name }} &middot;
+                    {{ $bGrace ? 'access until ' . $bInfo['grace_ends_at']->format('d M Y') : 'ends ' . $bSub->ends_at->format('d M Y') }}
+                </span>
+            </div>
+            <div class="sub-banner-bar" aria-hidden="true"><span style="width: {{ $bPct }}%"></span></div>
         </div>
-        <div class="d-flex align-items-center gap-2">
+
+        <div class="sub-banner-actions">
             @if ($b['grace']['can_request'] || $b['pendingGrace'])
-                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#graceModal">
-                    <span class="fa-regular fa-clock me-1"></span>{{ $b['pendingGrace'] ? 'Grace Requested' : 'Grace Period' }}
+                <button type="button" class="btn btn-sm btn-phoenix-{{ $bTone }} px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#graceModal">
+                    <span class="fa-regular fa-{{ $b['pendingGrace'] ? 'circle-check' : 'clock' }} me-1"></span>{{ $b['pendingGrace'] ? 'Grace requested' : 'Request grace period' }}
                 </button>
             @endif
-            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#renewModal">
-                <span class="fa-regular fa-credit-card me-1"></span>Renew
+            <button type="button" class="btn btn-sm btn-primary px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">
+                <span class="fa-regular fa-credit-card me-1"></span>Renew now
             </button>
-            <button type="button" class="btn-close" id="subscription-banner-close" aria-label="Close"></button>
         </div>
+
+        <button type="button" class="sub-banner-close" id="subscription-banner-close" aria-label="Dismiss" title="Dismiss">
+            <span class="fa-solid fa-xmark"></span>
+        </button>
     </div>
 @endif
 
@@ -120,46 +185,98 @@
             <form method="POST" action="{{ route('portal.grace.request') }}">
                 @csrf
                 <input type="hidden" name="_form" value="grace">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="graceModalTitle">Request Grace Period Extension</h5>
+                <div class="modal-header border-0 pb-0 align-items-start">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="grace-icon"><span class="fa-regular fa-clock"></span></div>
+                        <div>
+                            <h5 class="modal-title mb-0" id="graceModalTitle">Request a grace period</h5>
+                            <p class="fs-9 text-body-tertiary mb-0">Keep using the portal a little longer while you arrange payment.</p>
+                        </div>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
                 <div class="modal-body">
                     @if ($b['pendingGrace'])
-                        <div class="alert alert-subtle-info mb-0">
-                            Your request to extend the grace period until <strong>{{ $b['pendingGrace']->until_date->format('d F Y') }}</strong>
-                            is waiting for the administrator's approval.
+                        <div class="grace-status grace-status-info">
+                            <span class="fa-solid fa-hourglass-half grace-status-icon"></span>
+                            <div>
+                                <div class="fw-bold">Waiting for approval</div>
+                                <div class="fs-9">You asked to keep access until <strong>{{ $b['pendingGrace']->until_date->format('d F Y') }}</strong>. You can keep using the portal as soon as the administrator approves it.</div>
+                            </div>
                         </div>
                     @elseif (!$b['grace']['can_request'])
-                        <div class="alert alert-subtle-warning mb-0">The maximum grace period is already in place for your subscription. Please renew to keep using the portal.</div>
+                        <div class="grace-status grace-status-warning">
+                            <span class="fa-solid fa-circle-exclamation grace-status-icon"></span>
+                            <div>
+                                <div class="fw-bold">No more grace available</div>
+                                <div class="fs-9">The maximum grace period is already in place for your subscription. Please renew to keep using the portal.</div>
+                            </div>
+                        </div>
                     @else
+                        @php
+                            $gMin = $b['grace']['min'];
+                            $gMax = $b['grace']['max'];
+                            $gBase = $gMin->copy()->subDay(); // last day you can use the portal today
+                            $gChips = [];
+                            foreach ([3, 7, 15] as $n) {
+                                $d = $gBase->copy()->addDays($n);
+                                if ($d->lte($gMax)) {
+                                    $gChips[$d->toDateString()] = "+{$n} days";
+                                }
+                            }
+                            if (!isset($gChips[$gMax->toDateString()])) {
+                                $gChips[$gMax->toDateString()] = 'Max';
+                            }
+                        @endphp
+
                         @if ($b['lastGrace'])
-                            <div class="alert alert-subtle-{{ $b['lastGrace']->status === 'approved' ? 'success' : 'danger' }} fs-9 py-2">
-                                Your last request (until {{ $b['lastGrace']->until_date->format('d M Y') }}) was <strong>{{ $b['lastGrace']->status }}</strong>@if ($b['lastGrace']->admin_note): {{ $b['lastGrace']->admin_note }}@endif.
+                            <div class="grace-status grace-status-{{ $b['lastGrace']->status === 'approved' ? 'success' : 'danger' }} mb-3">
+                                <span class="fa-solid fa-{{ $b['lastGrace']->status === 'approved' ? 'circle-check' : 'circle-xmark' }} grace-status-icon"></span>
+                                <div class="fs-9">
+                                    Your last request (until {{ $b['lastGrace']->until_date->format('d M Y') }}) was <strong>{{ $b['lastGrace']->status }}</strong>@if ($b['lastGrace']->admin_note): {{ $b['lastGrace']->admin_note }}@endif.
+                                </div>
                             </div>
                         @endif
-                        <label class="form-label" for="until_date">Grace period end date</label>
-                        <div class="alert alert-subtle-info py-2">
-                            <strong>Current subscription end: {{ $b['info']['subscription']->ends_at->format('d F Y') }}</strong>
-                            @if ($b['info']['subscription']->grace_days > 0)
-                                <br><span class="fs-9">Current grace ends: {{ $b['info']['grace_ends_at']->format('d F Y') }}</span>
-                            @endif
+
+                        <div class="grace-tiles mb-4">
+                            <div class="grace-tile">
+                                <small>{{ $b['info']['state'] === 'grace' ? 'Plan ended' : 'Plan ends' }}</small>
+                                <strong>{{ $b['info']['subscription']->ends_at->format('d M Y') }}</strong>
+                            </div>
+                            <div class="grace-tile">
+                                <small>Access until</small>
+                                <strong>{{ $gBase->format('d M Y') }}</strong>
+                            </div>
+                            <div class="grace-tile">
+                                <small>Latest you can ask</small>
+                                <strong>{{ $gMax->format('d M Y') }}</strong>
+                            </div>
+                        </div>
+
+                        <label class="form-label fw-semibold" for="until_date">Keep my access until</label>
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            @foreach ($gChips as $date => $label)
+                                <button type="button" class="grace-chip" data-date="{{ $date }}">{{ $label }}</button>
+                            @endforeach
                         </div>
                         <input class="form-control @error('until_date') is-invalid @enderror" type="date" id="until_date" name="until_date"
-                               min="{{ $b['grace']['min']->format('Y-m-d') }}" max="{{ $b['grace']['max']->format('Y-m-d') }}"
+                               min="{{ $gMin->format('Y-m-d') }}" max="{{ $gMax->format('Y-m-d') }}" data-base="{{ $gBase->format('Y-m-d') }}"
                                value="{{ old('until_date') }}" required>
                         @error('until_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        <div class="form-text mb-3">Choose the date you would like the grace period to run until (between {{ $b['grace']['min']->format('d M Y') }} and {{ $b['grace']['max']->format('d M Y') }}).</div>
+                        <div class="grace-until-note" id="grace-until-note" aria-live="polite"></div>
+                        <div class="form-text mb-3">Pick a date between {{ $gMin->format('d M Y') }} and {{ $gMax->format('d M Y') }}, or tap a shortcut above.</div>
 
-                        <label class="form-label" for="grace_reason">Reason <span class="text-body-tertiary">(optional)</span></label>
-                        <textarea class="form-control @error('reason') is-invalid @enderror" id="grace_reason" name="reason" rows="2" maxlength="500">{{ old('reason') }}</textarea>
+                        <label class="form-label fw-semibold" for="grace_reason">Reason <span class="fw-normal text-body-tertiary">(optional)</span></label>
+                        <textarea class="form-control @error('reason') is-invalid @enderror" id="grace_reason" name="reason" rows="2" maxlength="500" placeholder="e.g. Payment is on the way, need a few more days">{{ old('reason') }}</textarea>
                         @error('reason')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     @endif
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Close</button>
                     @if (!$b['pendingGrace'] && $b['grace']['can_request'])
-                        <button type="submit" class="btn btn-primary">Request Extension</button>
+                        <button type="submit" class="btn btn-primary"><span class="fa-solid fa-paper-plane me-2"></span>Send request</button>
                     @endif
                 </div>
             </form>
@@ -279,11 +396,12 @@
     var banner = document.getElementById('subscription-banner');
     if (banner) {
         var closed = false;
-        try { closed = sessionStorage.getItem('subBannerClosed') === '1'; } catch (e) {}
+        var closedKey = 'subBannerClosed:' + @json(($b['info']['state'] ?? '') . ':' . ($b['info']['days_left'] ?? $b['info']['grace_days_left'] ?? ''));
+        try { closed = sessionStorage.getItem(closedKey) === '1'; } catch (e) {}
         var closeBtn = document.getElementById('subscription-banner-close');
         if (closeBtn) closeBtn.addEventListener('click', function () {
             banner.remove();
-            try { sessionStorage.setItem('subBannerClosed', '1'); } catch (e) {}
+            try { sessionStorage.setItem(closedKey, '1'); } catch (e) {}
         });
         if (closed) {
             banner.remove();
@@ -301,6 +419,31 @@
                 obs.observe(document.body, { childList: true, subtree: true });
             }
         }
+    }
+
+    // ---- grace popup: quick-pick chips + live "access until" note ----
+    var graceInput = document.getElementById('until_date');
+    var graceNote = document.getElementById('grace-until-note');
+    if (graceInput && graceNote) {
+        var graceChips = document.querySelectorAll('.grace-chip');
+        var toDate = function (v) { return new Date(v + 'T00:00:00'); };
+        var refreshGrace = function () {
+            var v = graceInput.value;
+            graceChips.forEach(function (c) { c.classList.toggle('active', c.dataset.date === v); });
+            graceNote.textContent = '';
+            if (!v) return;
+            var days = Math.round((toDate(v) - toDate(graceInput.dataset.base)) / 86400000);
+            if (days < 1) return;
+            graceNote.textContent = 'You will keep access until ' +
+                toDate(v).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+                ' (' + days + ' extra day' + (days === 1 ? '' : 's') + ').';
+        };
+        graceChips.forEach(function (c) {
+            c.addEventListener('click', function () { graceInput.value = c.dataset.date; refreshGrace(); });
+        });
+        graceInput.addEventListener('input', refreshGrace);
+        graceInput.addEventListener('change', refreshGrace);
+        refreshGrace();
     }
 
     // ---- renew popup: live months / total ----
@@ -374,6 +517,22 @@
     var left = document.getElementById('sub-nav-left');
     var right = document.getElementById('sub-nav-right');
     var logoutForm = document.getElementById('sub-logout-form');
+
+    // "Sign out" must work with every Phoenix navbar layout (default, slim, horizontal, combo, dual).
+    // Phoenix keeps one navbar and removes the others, so a listener attached to one particular navbar
+    // disappears with it. Listen on the document instead (capture phase, before the dropdown handles it).
+    if (logoutForm) {
+        document.addEventListener('click', function (e) {
+            var link = e.target.closest ? e.target.closest('a') : null;
+            if (!link) return;
+            var inProfile = link.closest('.dropdown-profile') && /sign\s*out/i.test(link.textContent);
+            var signOutPage = /sign-out\.html(?:$|[?#])/.test(link.getAttribute('href') || '');
+            if (!inProfile && !signOutPage) return;
+            e.preventDefault();
+            logoutForm.submit();
+        }, true);
+    }
+
     if (!store || !left || !right) return;
 
     var place = function () {
@@ -404,15 +563,6 @@
                 p.textContent = sub;
                 name.parentNode.insertBefore(p, name.nextSibling);
             }
-        }
-
-        // "Sign out" in the dropdown really logs out
-        var signOut = profile.querySelector('.card-footer a.btn');
-        if (signOut && logoutForm) {
-            signOut.addEventListener('click', function (e) {
-                e.preventDefault();
-                logoutForm.submit();
-            });
         }
         return true;
     };

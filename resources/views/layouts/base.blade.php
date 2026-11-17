@@ -35,6 +35,16 @@
       /* login cards/labels always use the theme's own colours */
       .main { color: var(--phoenix-body-color); }
       .form-text { color: var(--phoenix-tertiary-color); }
+
+      /* password show / hide button (added by the script below to every password field) */
+      .pw-wrap { position: relative; }
+      .pw-wrap > .form-control, .pw-wrap > .form-control.is-invalid { padding-right: 2.9rem; background-image: none; }
+      .pw-wrap:has(> .form-control.is-invalid) ~ .invalid-feedback { display: block; }
+      .pw-toggle { position: absolute; top: 0; right: 0; width: 2.9rem; height: 100%; padding: 0; display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: var(--phoenix-tertiary-color); cursor: pointer; }
+      .pw-toggle:hover, .pw-toggle:focus-visible { color: var(--phoenix-primary); outline: none; }
+      .pw-toggle svg { width: 1.15rem; height: 1.15rem; }
+      /* hide Edge's own reveal icon: it only appears on the first focus, so ours replaces it */
+      input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
     </style>
 </head>
 <body>
@@ -55,6 +65,40 @@
       root.setAttribute('data-bs-theme', next);
       try { localStorage.setItem('phoenixTheme', next); } catch (e) {}
       paint();
+    });
+  })();
+</script>
+
+<script>
+  (function () {
+    var attrs = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+    var eye = '<svg ' + attrs + '><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var eyeOff = '<svg ' + attrs + '><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+    document.querySelectorAll('input[type="password"]').forEach(function (input) {
+      var wrap = document.createElement('div');
+      wrap.className = 'pw-wrap';
+      input.parentNode.insertBefore(wrap, input);
+      wrap.appendChild(input);
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pw-toggle';
+      btn.innerHTML = eye;
+      btn.setAttribute('aria-label', 'Show password');
+      btn.setAttribute('aria-pressed', 'false');
+      btn.title = 'Show password';
+      wrap.appendChild(btn);
+
+      btn.addEventListener('click', function () {
+        var show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        btn.innerHTML = show ? eyeOff : eye;
+        btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+        btn.title = show ? 'Hide password' : 'Show password';
+        input.focus();
+      });
     });
   })();
 </script>

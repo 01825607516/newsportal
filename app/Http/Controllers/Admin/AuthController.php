@@ -13,7 +13,7 @@ class AuthController extends Controller
     {
         return $request->session()->has('admin_id')
             ? redirect()->route('admin.dashboard')
-            : view('admin.login');
+            : response()->view('admin.login')->withHeaders(['Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0']);
     }
 
     public function login(Request $request)

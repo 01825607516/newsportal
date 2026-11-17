@@ -14,13 +14,51 @@ use Illuminate\Support\Facades\DB;
 /** Admin side of the portal "grace period" and "renew / purchase" requests. */
 class RequestController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $q = trim((string) $request->query('q', ''));
+        $renewalStatus = in_array($request->query('renewal_status'), ['approved', 'rejected'], true)
+            ? $request->query('renewal_status')
+            : '';
+        $graceStatus = in_array($request->query('grace_status'), ['approved', 'rejected'], true)
+            ? $request->query('grace_status')
+            : '';
+        $filterByPortal = static function ($query) use ($q) {
+            $query->where(function ($portal) use ($q) {
+                $portal->where('portal_name', 'like', "%{$q}%")
+                    ->orWhere('editor_mobile', 'like', "%{$q}%")
+                    ->orWhere('editor_email', 'like', "%{$q}%");
+            });
+        };
+
         return view('admin.requests.index', [
-            'pendingPurchases' => PurchaseRequest::with(['portal', 'package'])->where('status', 'pending')->oldest()->get(),
-            'pendingGraces' => GraceRequest::with('portal')->where('status', 'pending')->oldest()->get(),
-            'historyPurchases' => PurchaseRequest::with(['portal', 'package'])->where('status', '!=', 'pending')->latest('decided_at')->limit(20)->get(),
-            'historyGraces' => GraceRequest::with('portal')->where('status', '!=', 'pending')->latest('decided_at')->limit(20)->get(),
+            'q' => $q,
+            'renewalStatus' => $renewalStatus,
+            'graceStatus' => $graceStatus,
+            'pendingPurchases' => PurchaseRequest::with(['portal', 'package'])
+                ->where('status', 'pending')
+                ->when($q !== '', fn ($query) => $query->whereHas('portal', $filterByPortal))
+                ->oldest()
+                ->paginate(8, ['*'], 'renewals_page')
+                ->withQueryString(),
+            'pendingGraces' => GraceRequest::with('portal')
+                ->where('status', 'pending')
+                ->when($q !== '', fn ($query) => $query->whereHas('portal', $filterByPortal))
+                ->oldest()
+                ->paginate(8, ['*'], 'grace_page')
+                ->withQueryString(),
+            'historyPurchases' => PurchaseRequest::with(['portal', 'package'])
+                ->whereIn('status', ['approved', 'rejected'])
+                ->when($renewalStatus !== '', fn ($query) => $query->where('status', $renewalStatus))
+                ->latest('decided_at')
+                ->limit(20)
+                ->get(),
+            'historyGraces' => GraceRequest::with('portal')
+                ->whereIn('status', ['approved', 'rejected'])
+                ->when($graceStatus !== '', fn ($query) => $query->where('status', $graceStatus))
+                ->latest('decided_at')
+                ->limit(20)
+                ->get(),
         ]);
     }
 

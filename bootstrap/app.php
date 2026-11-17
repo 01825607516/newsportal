@@ -6,6 +6,8 @@ use App\Http\Middleware\LogPortalActivity;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(web: __DIR__.'/../routes/web.php', commands: __DIR__.'/../routes/console.php')
@@ -17,6 +19,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        // Configure exception reporting here.
+        // A dashboard left open longer than the session lifetime fails the CSRF check (419) when the
+        // person clicks Sign out. Logging out is what they wanted anyway, so go to the login page.
+        $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
+            if ($e->getStatusCode() === 419 && $request->routeIs('portal.logout')) {
+                $request->session()->forget('portal_id');
+
+                return redirect()->route('portal.login');
+            }
+        });
     })
     ->create();
