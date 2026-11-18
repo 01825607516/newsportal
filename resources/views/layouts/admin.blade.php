@@ -91,6 +91,21 @@
         .portal-status-filter { grid-column: 1 / -1; }
         .portal-filters .btn { width: 100%; }
       }
+
+      @media (min-width: 992px) {
+        .main > .navbar-vertical {
+          position: fixed !important;
+          top: var(--phoenix-navbar-top-height);
+          bottom: 0;
+          height: calc(100vh - var(--phoenix-navbar-top-height));
+          overflow: hidden;
+        }
+        .main > .navbar-vertical .navbar-vertical-content {
+          height: calc(100vh - var(--phoenix-navbar-top-height) - 4rem);
+          overflow-y: auto;
+          overscroll-behavior: contain;
+        }
+      }
     </style>
 </head>
 <body>
