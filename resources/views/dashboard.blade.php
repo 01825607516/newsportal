@@ -40,10 +40,18 @@
     $b = $billing ?? null;
     $methods = config('billing.methods');
     $reopen = old('_form');
+    $isTrialSubscription = (bool) data_get($subscriptionInfo ?? [], 'subscription.package.is_trial', true);
+    $subscriptionAction = $isTrialSubscription ? 'Purchase' : 'Renew';
 @endphp
+@if (($module ?? null) === 'categories')
 <style>
-    .sub-toast { position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); z-index: 2100; width: min(34rem, 92vw); }
-    .portal-support-notice { position: fixed; top: 5.25rem; right: 1rem; z-index: 2200; width: min(24rem, calc(100vw - 2rem)); padding: .55rem .75rem; font-size: .8rem; line-height: 1.4; }
+    /* Module page: same Phoenix shell, only the content area differs. */
+    #app .content > *:not(.footer):not(.cat-module):not(#subscription-banner) { display: none !important; }
+</style>
+@endif
+<style>
+    .sub-toast { position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); z-index: 2100; width: min(28rem, 92vw); padding: .5rem 2.5rem .5rem .75rem; font-size: .85rem; }
+    .portal-support-notice { position: fixed; top: 5rem; right: 1rem; z-index: 2200; width: min(36rem, calc(100vw - 2rem)); }
     .plan-card { cursor: pointer; display: block; border: 1px solid var(--phoenix-border-color); border-radius: .5rem; padding: .75rem 1rem; margin-bottom: .6rem; }
     .plan-card:hover { border-color: var(--phoenix-primary); }
     .plan-card input:checked ~ .plan-body { color: var(--phoenix-primary); }
@@ -124,8 +132,9 @@
                 </button>
             </form>
         @endif
-        {{-- The Grace Period button lives in the "expiring soon" banner, which only shows inside the package's window. --}}
-        <button type="button" class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">Purchase</button>
+        <button type="button" class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">
+            <span class="fa-regular fa-credit-card me-1" aria-hidden="true"></span>{{ $isTrialSubscription ? 'Purchase' : 'Renew now' }}
+        </button>
     </div>
 
     <form id="sub-logout-form" method="POST" action="{{ ($adminSupport ?? false) ? route('admin.support.end', $adminSupportSession) : route('portal.logout') }}">@csrf</form>
@@ -165,9 +174,14 @@
     </span>
 @endif
 
+@if (!empty($activeSupportSession))
+    <div class="portal-support-notice alert alert-subtle-warning d-flex align-items-start gap-2" role="status">
+        <span class="fa-solid fa-eye mt-1" aria-hidden="true"></span>
+        <div><strong>Admin support session active.</strong><br>{{ $activeSupportSession->admin_name }} can submit purchase and grace-period requests. Actions are audited and require approval.</div>
+    </div>
+@endif
 
-
-@if ($b && $b['banner']['show'])
+@if ($b && $b['banner']['show'] && !$b['pendingGrace'])
     @php
         $bInfo = $b['info'];
         $bSub = $bInfo['subscription'];
@@ -194,14 +208,11 @@
         </div>
 
         <div class="sub-banner-actions">
-            @if ($b['grace']['can_request'] || $b['pendingGrace'])
+            @if ($b['grace']['can_request'] && !$b['pendingGrace'])
                 <button type="button" class="btn btn-sm btn-phoenix-{{ $bTone }} px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#graceModal">
-                    <span class="fa-regular fa-{{ $b['pendingGrace'] ? 'circle-check' : 'clock' }} me-1"></span>{{ $b['pendingGrace'] ? 'Grace requested' : 'Request grace period' }}
+                    <span class="fa-regular fa-clock me-1"></span>Request grace period
                 </button>
             @endif
-            <button type="button" class="btn btn-sm btn-primary px-3 text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">
-                <span class="fa-regular fa-credit-card me-1"></span>Renew now
-            </button>
         </div>
 
         <button type="button" class="sub-banner-close" id="subscription-banner-close" aria-label="Dismiss" title="Dismiss">
@@ -327,13 +338,13 @@
                 @csrf
                 <input type="hidden" name="_form" value="renew">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="renewModalTitle">Renew Subscription</h5>
+                    <h5 class="modal-title" id="renewModalTitle">{{ $subscriptionAction }} Subscription</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     @if ($b['pendingPurchase'])
                         <div class="alert alert-subtle-info mb-0">
-                            Your renewal request is waiting for the administrator's approval:<br>
+                            Your {{ strtolower($subscriptionAction) }} request is waiting for the administrator's approval:<br>
                             <strong>{{ $b['pendingPurchase']->package->name }}</strong> · {{ $b['pendingPurchase']->months }} month(s) · {{ $money($b['pendingPurchase']->amount) }}
                             via {{ $methods[$b['pendingPurchase']->method] ?? ucfirst($b['pendingPurchase']->method) }}@if ($b['pendingPurchase']->trx_id) (Trx {{ $b['pendingPurchase']->trx_id }})@endif.
                         </div>
@@ -342,7 +353,7 @@
                     @else
                         @if ($b['lastPurchase'])
                             <div class="alert alert-subtle-{{ $b['lastPurchase']->status === 'approved' ? 'success' : 'danger' }} fs-9 py-2">
-                                Your last renewal request ({{ $b['lastPurchase']->package->name }}, {{ $b['lastPurchase']->months }} month(s)) was <strong>{{ $b['lastPurchase']->status }}</strong>@if ($b['lastPurchase']->admin_note): {{ $b['lastPurchase']->admin_note }}@endif.
+                                Your last {{ strtolower($subscriptionAction) }} request ({{ $b['lastPurchase']->package->name }}, {{ $b['lastPurchase']->months }} month(s)) was <strong>{{ $b['lastPurchase']->status }}</strong>@if ($b['lastPurchase']->admin_note): {{ $b['lastPurchase']->admin_note }}@endif.
                             </div>
                         @endif
 
@@ -417,7 +428,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     @if (!$b['pendingPurchase'] && $b['packages']->isNotEmpty())
-                        <button type="submit" class="btn btn-primary">Renew</button>
+                        <button type="submit" class="btn btn-primary">{{ $subscriptionAction }}</button>
                     @endif
                 </div>
             </form>
@@ -546,6 +557,51 @@
 })();
 </script>
 @endif
+@if (($module ?? null) === 'categories')
+    @include('modules.categories')
+@endif
+
+{{-- "Categories" link in the sidebar: Home > Categories, right below "Project management" (same markup as the other sub-menu items). --}}
+<script>
+(function () {
+    var isCategories = @json(($module ?? null) === 'categories');
+    var href = @json(route('categories.index'));
+
+    var place = function () {
+        var list = document.querySelector('#navbarVerticalNav #nv-home');
+        if (!list) return false;
+        if (list.querySelector('[data-portal-module="categories"]')) return true;
+
+        var after = null;
+        list.querySelectorAll(':scope > li.nav-item').forEach(function (item) {
+            var t = item.querySelector('.nav-link-text');
+            if (t && t.textContent.trim() === 'Project management') after = item;
+        });
+        if (!after) return false;
+
+        var li = document.createElement('li');
+        li.className = 'nav-item';
+        li.setAttribute('data-portal-module', 'categories');
+        li.innerHTML = '<a class="nav-link' + (isCategories ? ' active' : '') + '" href="' + href + '">' +
+            '<div class="d-flex align-items-center"><span class="nav-link-text">Categories</span></div></a>';
+        after.parentNode.insertBefore(li, after.nextSibling);
+
+        if (isCategories) {
+            // the dashboard link is no longer the current page
+            document.querySelectorAll('#navbarVerticalNav a.nav-link.active').forEach(function (a) {
+                if (!li.contains(a)) a.classList.remove('active');
+            });
+        }
+        return true;
+    };
+
+    if (!place()) {
+        var obs = new MutationObserver(function () { if (place()) obs.disconnect(); });
+        obs.observe(document.body, { childList: true, subtree: true });
+    }
+})();
+</script>
+
 <script>
 (function () {
     var store = document.getElementById('sub-nav-store');

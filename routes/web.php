@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\PortalController as AdminPortalController;
 use App\Http\Controllers\Admin\PortalSupportController as AdminPortalSupportController;
 use App\Http\Controllers\Admin\RequestController as AdminRequestController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\PortalAuthController;
 use App\Http\Controllers\PortalBillingController;
@@ -25,6 +26,14 @@ Route::get('/logout', FallbackController::class);
 Route::middleware(['portal.auth', 'portal.log'])->group(function () {
     Route::get('/', [PortalBillingController::class, 'dashboard'])->name('dashboard');
     Route::get('/dashboard/project-management', [PortalBillingController::class, 'dashboard'])->name('project-management');
+
+    // Category module (3-level tree in the portal's own database)
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('/categories/data', [CategoryController::class, 'data'])->name('categories.data');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{id}', [CategoryController::class, 'update'])->whereNumber('id')->name('categories.update');
+    Route::post('/categories/{id}/toggle', [CategoryController::class, 'toggle'])->whereNumber('id')->name('categories.toggle');
+    Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->whereNumber('id')->name('categories.destroy');
 
     Route::post('/subscription/grace', [PortalBillingController::class, 'requestGrace'])->name('portal.grace.request');
     Route::post('/subscription/purchase', [PortalBillingController::class, 'requestPurchase'])->name('portal.purchase.request');
