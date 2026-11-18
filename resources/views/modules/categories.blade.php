@@ -8,7 +8,7 @@
     .cat-module .cat-row-l1 .cat-title { font-weight: 700; }
     .cat-module .cat-image-thumb, .cat-module .cat-image-placeholder { width: 2rem; height: 2rem; flex: none; border: 1px solid var(--phoenix-border-color); border-radius: .35rem; object-fit: cover; }
     .cat-module .cat-image-placeholder { display: inline-flex; align-items: center; justify-content: center; color: var(--phoenix-tertiary-color); background: var(--phoenix-secondary-bg-subtle); }
-    .cat-module .cat-image-preview { max-width: 9rem; max-height: 6rem; object-fit: contain; border: 1px solid var(--phoenix-border-color); border-radius: .4rem; }
+    #catModal .cat-image-preview { display: block; width: 10rem; height: 7rem; max-width: 100%; object-fit: contain; border: 1px solid var(--phoenix-border-color); border-radius: .4rem; }
     .cat-module .cat-table th { padding: .6rem .75rem; white-space: nowrap; font-size: .75rem; letter-spacing: .04em; text-transform: uppercase; color: var(--phoenix-tertiary-color); border-bottom-width: 1px; }
     .cat-module .cat-table td { padding: .35rem .75rem; vertical-align: middle; line-height: 1.3; }
     .cat-module .cat-table tbody tr:hover > td { background: var(--phoenix-body-highlight-bg, rgba(0, 0, 0, .03)); }
@@ -131,9 +131,9 @@
                         </div>
                         <div class="col-12">
                             <label class="form-label" for="cat-f-image">Category image</label>
-                            <input class="form-control" type="file" id="cat-f-image" name="image" accept="image/jpeg,image/png,image/webp">
+                            <input class="form-control" type="file" id="cat-f-image" name="image" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp">
                             <div class="invalid-feedback"></div>
-                            <div class="form-text">JPG, PNG or WebP; maximum 2 MB. Leave empty to keep the current image.</div>
+                            <div class="form-text">JPG, PNG, WebP, GIF or BMP; maximum 5 MB. Leave empty to keep the current image.</div>
                             <img class="cat-image-preview d-none mt-2" id="cat-image-preview" alt="Category image preview">
                         </div>
                         <div class="col-12">

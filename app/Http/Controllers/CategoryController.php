@@ -205,7 +205,7 @@ class CategoryController extends Controller
             'title' => ['nullable', 'string', 'max:100'],
             'keywords' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:255'],
-            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp,gif,bmp', 'max:5120'],
             'status' => ['required', 'boolean'],
         ], [
             'name.required' => 'Please enter a name.',
