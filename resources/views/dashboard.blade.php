@@ -43,7 +43,7 @@
 @endphp
 <style>
     .sub-toast { position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); z-index: 2100; width: min(34rem, 92vw); }
-    .portal-support-notice { position: fixed; top: 5rem; right: 1rem; z-index: 2200; width: min(36rem, calc(100vw - 2rem)); }
+    .portal-support-notice { position: fixed; top: 5.25rem; right: 1rem; z-index: 2200; width: min(24rem, calc(100vw - 2rem)); padding: .55rem .75rem; font-size: .8rem; line-height: 1.4; }
     .plan-card { cursor: pointer; display: block; border: 1px solid var(--phoenix-border-color); border-radius: .5rem; padding: .75rem 1rem; margin-bottom: .6rem; }
     .plan-card:hover { border-color: var(--phoenix-primary); }
     .plan-card input:checked ~ .plan-body { color: var(--phoenix-primary); }
@@ -165,12 +165,7 @@
     </span>
 @endif
 
-@if (!empty($activeSupportSession))
-    <div class="portal-support-notice alert alert-subtle-warning d-flex align-items-start gap-2" role="status">
-        <span class="fa-solid fa-eye mt-1" aria-hidden="true"></span>
-        <div><strong>Admin support session active.</strong><br>{{ $activeSupportSession->admin_name }} can submit purchase and grace-period requests. Actions are audited and require approval.</div>
-    </div>
-@endif
+
 
 @if ($b && $b['banner']['show'])
     @php
