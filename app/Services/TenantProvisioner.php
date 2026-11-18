@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Portal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Throwable;
 
 class TenantProvisioner
@@ -15,9 +16,9 @@ class TenantProvisioner
      */
     public function provision(Portal $portal): void
     {
-        $dbName = $portal->database_name ?: config('tenancy.database_prefix') . $portal->id;
-
         try {
+            $dbName = $portal->database_name ?: $this->databaseNameFor($portal);
+
             // dbName is built from a prefix + integer id, but we still restrict it to be safe.
             if (!preg_match('/^[A-Za-z0-9_]{1,64}$/', $dbName)) {
                 throw new \RuntimeException("Invalid tenant database name: {$dbName}");
@@ -46,6 +47,22 @@ class TenantProvisioner
             $portal->save();
             throw $e;
         }
+    }
+
+    private function databaseNameFor(Portal $portal): string
+    {
+        $prefix = (string) config('tenancy.database_prefix');
+        $suffix = '_' . $portal->id;
+        $slugLength = 64 - strlen($prefix) - strlen($suffix);
+
+        if ($slugLength < 1) {
+            throw new \RuntimeException('The tenant database prefix is too long.');
+        }
+
+        $slug = Str::slug($portal->portal_name, '_');
+        $slug = substr($slug !== '' ? $slug : 'portal', 0, $slugLength);
+
+        return $prefix . $slug . $suffix;
     }
 
     /** Drop the tenant database (used when admin deletes a portal). */

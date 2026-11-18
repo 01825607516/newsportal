@@ -19,6 +19,7 @@
   <div class="d-flex flex-wrap gap-2">
     @if ($portal->isProvisioned())
       <form method="POST" action="{{ route('admin.portals.support.start', $portal) }}"
+            target="_blank" rel="noopener"
             data-confirm="Start an audited support session? You can submit purchase and grace-period requests, which still require approval.">
         @csrf
         <button class="btn btn-phoenix-primary" type="submit">Log in as admin</button>

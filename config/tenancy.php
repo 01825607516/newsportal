@@ -15,7 +15,8 @@ return [
         'engine' => null,
     ],
 
-    // Each portal gets a database named  <prefix><portal id>, e.g. tenant_12
+    // New tenant databases use <prefix><portal-name>_<portal id>, e.g. tenant_demo_portal_12.
+    // Existing portals keep their assigned database_name so their tenant data is not moved.
     'database_prefix' => env('TENANT_DB_PREFIX', 'tenant_'),
 
     // Schema (and optionally sample data) imported into every new tenant DB
