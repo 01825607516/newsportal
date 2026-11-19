@@ -47,6 +47,22 @@
 <style>
     /* Module page: same Phoenix shell, only the content area differs. */
     #app .content > *:not(.footer):not(.cat-module):not(#subscription-banner) { display: none !important; }
+    #app .content {
+        min-height: calc(100vh - var(--phoenix-navbar-top-height, 64px));
+        display: flex;
+        flex-direction: column;
+    }
+    #app .content > .cat-module {
+        flex: 1 0 auto;
+    }
+    #app .content > .footer {
+        position: relative !important;
+        bottom: auto;
+        left: auto;
+        right: auto;
+        margin-top: auto;
+        flex: 0 0 4rem;
+    }
 </style>
 @endif
 <style>
@@ -123,14 +139,6 @@
                   title="Support for {{ $currentPortal->portal_name }} by {{ $supportAdmin->name }}. Billing requests require approval and are audited.">
                 <span class="fa-solid fa-headset me-1" aria-hidden="true"></span>Support · Write
             </span>
-            <form method="POST" action="{{ route('admin.support.end', $adminSupportSession) }}" class="m-0">
-                @csrf
-                <button type="submit" class="btn btn-sm btn-warning text-nowrap"
-                        aria-label="End admin support session" title="End admin support session">
-                    <span class="fa-solid fa-right-from-bracket me-1" aria-hidden="true"></span>
-                    <span class="d-none d-lg-inline">End support</span>
-                </button>
-            </form>
         @endif
         <button type="button" class="btn btn-sm btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#renewModal">
             <span class="fa-regular fa-credit-card me-1" aria-hidden="true"></span>{{ $isTrialSubscription ? 'Purchase' : 'Renew now' }}
@@ -174,12 +182,7 @@
     </span>
 @endif
 
-@if (!empty($activeSupportSession))
-    <div class="portal-support-notice alert alert-subtle-warning d-flex align-items-start gap-2" role="status">
-        <span class="fa-solid fa-eye mt-1" aria-hidden="true"></span>
-        <div><strong>Admin support session active.</strong><br>{{ $activeSupportSession->admin_name }} can submit purchase and grace-period requests. Actions are audited and require approval.</div>
-    </div>
-@endif
+
 
 @if ($b && $b['banner']['show'] && !$b['pendingGrace'])
     @php
