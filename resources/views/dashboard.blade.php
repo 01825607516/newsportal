@@ -51,17 +51,19 @@
         min-height: calc(100vh - var(--phoenix-navbar-top-height, 64px));
         display: flex;
         flex-direction: column;
+        padding-bottom: 5rem;
     }
     #app .content > .cat-module {
         flex: 1 0 auto;
     }
     #app .content > .footer {
-        position: relative !important;
-        bottom: auto;
-        left: auto;
-        right: auto;
-        margin-top: auto;
-        flex: 0 0 4rem;
+        position: fixed !important;
+        inset: auto 0 0 var(--phoenix-navbar-vertical-width, 5.25rem);
+        z-index: 1020;
+        width: auto;
+        min-height: 4rem;
+        margin: 0;
+        background: var(--phoenix-body-bg, var(--phoenix-card-bg));
     }
 </style>
 @endif
