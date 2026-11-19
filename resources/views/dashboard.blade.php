@@ -47,6 +47,13 @@
 <style>
     /* Module page: same Phoenix shell, only the content area differs. */
     #app .content > *:not(.footer):not(.cat-module):not(#subscription-banner) { display: none !important; }
+    #app .content > .footer {
+        position: fixed !important;
+        inset: auto 0 0 var(--phoenix-navbar-vertical-width, 15.875rem);
+        z-index: 1020;
+        width: auto;
+        background: var(--phoenix-body-bg, var(--phoenix-card-bg));
+    }
 </style>
 @endif
 <style>
