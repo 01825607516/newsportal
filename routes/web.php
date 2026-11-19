@@ -11,6 +11,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\ImageResizeController;
+use App\Http\Controllers\NewsEntryController;
 use App\Http\Controllers\PortalAuthController;
 use App\Http\Controllers\PortalBillingController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,10 @@ Route::middleware(['portal.auth', 'portal.log'])->group(function () {
     Route::put('/categories/{id}', [CategoryController::class, 'update'])->whereNumber('id')->name('categories.update');
     Route::post('/categories/{id}/toggle', [CategoryController::class, 'toggle'])->whereNumber('id')->name('categories.toggle');
     Route::delete('/categories/{id}', [CategoryController::class, 'destroy'])->whereNumber('id')->name('categories.destroy');
+
+    Route::get('/news/create', [NewsEntryController::class, 'create'])->name('news.create');
+    Route::post('/news', [NewsEntryController::class, 'store'])->name('news.store');
+    Route::get('/news/reporters', [NewsEntryController::class, 'reporters'])->name('news.reporters');
 
     Route::post('/subscription/grace', [PortalBillingController::class, 'requestGrace'])->name('portal.grace.request');
     Route::post('/subscription/purchase', [PortalBillingController::class, 'requestPurchase'])->name('portal.purchase.request');

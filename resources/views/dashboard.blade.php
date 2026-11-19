@@ -43,17 +43,17 @@
     $isTrialSubscription = (bool) data_get($subscriptionInfo ?? [], 'subscription.package.is_trial', true);
     $subscriptionAction = $isTrialSubscription ? 'Purchase' : 'Renew';
 @endphp
-@if (($module ?? null) === 'categories')
+@if (in_array(($module ?? null), ['categories', 'news-entry'], true))
 <style>
     /* Module page: same Phoenix shell, only the content area differs. */
-    #app .content > *:not(.footer):not(.cat-module):not(#subscription-banner) { display: none !important; }
+    #app .content > *:not(.footer):not(.cat-module):not(.news-module):not(#subscription-banner) { display: none !important; }
     #app .content {
         min-height: calc(100vh - var(--phoenix-navbar-top-height, 64px));
         display: flex;
         flex-direction: column;
         padding-bottom: 5rem;
     }
-    #app .content > .cat-module {
+    #app .content > .cat-module, #app .content > .news-module {
         flex: 1 0 auto;
     }
     #app .content > .footer {
@@ -565,18 +565,22 @@
 @if (($module ?? null) === 'categories')
     @include('modules.categories')
 @endif
+@if (($module ?? null) === 'news-entry')
+    @include('modules.news-entry')
+@endif
 
 {{-- "Categories" link in the sidebar: Home > Categories, right below "Project management" (same markup as the other sub-menu items). --}}
 <script>
 (function () {
-    var isCategories = @json(($module ?? null) === 'categories');
-    var href = @json(route('categories.index'));
+    var activeModule = @json($module ?? null);
+    var modules = [
+        { key: 'categories', label: 'Categories', href: @json(route('categories.index')) },
+        { key: 'news-entry', label: 'News Entry', href: @json(route('news.create')) }
+    ];
 
     var place = function () {
         var list = document.querySelector('#navbarVerticalNav #nv-home');
         if (!list) return false;
-        if (list.querySelector('[data-portal-module="categories"]')) return true;
-
         var after = null;
         list.querySelectorAll(':scope > li.nav-item').forEach(function (item) {
             var t = item.querySelector('.nav-link-text');
@@ -584,17 +588,22 @@
         });
         if (!after) return false;
 
-        var li = document.createElement('li');
-        li.className = 'nav-item';
-        li.setAttribute('data-portal-module', 'categories');
-        li.innerHTML = '<a class="nav-link' + (isCategories ? ' active' : '') + '" href="' + href + '">' +
-            '<div class="d-flex align-items-center"><span class="nav-link-text">Categories</span></div></a>';
-        after.parentNode.insertBefore(li, after.nextSibling);
+        modules.forEach(function (item) {
+            if (list.querySelector('[data-portal-module="' + item.key + '"]')) return;
+            var li = document.createElement('li');
+            li.className = 'nav-item';
+            li.setAttribute('data-portal-module', item.key);
+            li.innerHTML = '<a class="nav-link' + (activeModule === item.key ? ' active' : '') + '" href="' + item.href + '">' +
+                '<div class="d-flex align-items-center"><span class="nav-link-text">' + item.label + '</span></div></a>';
+            after.parentNode.insertBefore(li, after.nextSibling);
+            after = li;
+        });
 
-        if (isCategories) {
+        if (activeModule === 'categories' || activeModule === 'news-entry') {
             // the dashboard link is no longer the current page
+            var activeItem = list.querySelector('[data-portal-module="' + activeModule + '"]');
             document.querySelectorAll('#navbarVerticalNav a.nav-link.active').forEach(function (a) {
-                if (!li.contains(a)) a.classList.remove('active');
+                if (!activeItem || !activeItem.contains(a)) a.classList.remove('active');
             });
         }
         return true;

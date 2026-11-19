@@ -184,7 +184,8 @@ class CategoryController extends Controller
             return response()->json(['message' => 'This category has sub-categories. Delete or move them first.'], 422);
         }
 
-        $inUse = $db->table('news_common_info')->where('cat_id', $id)->orWhere('sub_cat_id', $id)->exists();
+        $inUse = $db->table('news_common_info')->where('cat_id', $id)
+            ->orWhere('cat_child_1', $id)->orWhere('cat_child_2', $id)->exists();
         if ($inUse) {
             return response()->json(['message' => 'This category is used by news and cannot be deleted. Disable it instead.'], 422);
         }

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Portal;
 use App\Services\ActivityMonitor;
+use App\Services\PortalUserDirectory;
 use App\Services\SubscriptionService;
+use App\Services\TenantManager;
 use App\Services\TenantProvisioner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -203,6 +205,11 @@ class PortalAuthController extends Controller
     {
         $portal->last_login_at = now();
         $portal->save();
+
+        TenantManager::connect($portal);
+        $directory = app(PortalUserDirectory::class);
+        $directory->syncOwner($portal);
+        $directory->syncTenantUsers($portal);
 
         $request->session()->regenerate();
         $request->session()->put('portal_id', $portal->id);
