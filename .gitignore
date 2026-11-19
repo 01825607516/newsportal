@@ -5,6 +5,7 @@ public/hot
 public/assets/
 public/vendors/
 storage/*.key
+/storage/app/image-cache/
 storage/framework/cache/data/*
 storage/framework/sessions/*
 storage/framework/views/*
@@ -15,5 +16,5 @@ storage/logs/*
 !storage/logs/.gitignore
 .env
 .env.*
-!.env.example
+.env.example
 database/database.sqlite

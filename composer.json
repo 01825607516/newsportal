@@ -4,6 +4,7 @@
   "description": "Phoenix project management dashboard powered by Laravel and Vue.",
   "require": {
     "php": "^8.2",
+    "ext-gd": "*",
     "inertiajs/inertia-laravel": "^3.7",
     "laravel/framework": "^12.0"
   },

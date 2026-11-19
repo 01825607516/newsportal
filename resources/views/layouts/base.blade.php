@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'News Portal')</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('assets/img/favicons/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url('media/assets/img/favicons/favicon-32x32.png?size=32') }}">
 
     {{-- Apply the saved Phoenix theme (same localStorage key the admin panel and the portal dashboard use)
          BEFORE the CSS paints, so the login pages follow light / dark / auto without a flash. --}}

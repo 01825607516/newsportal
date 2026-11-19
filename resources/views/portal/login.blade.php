@@ -6,7 +6,7 @@
     <div class="row flex-center min-vh-100 py-5">
       <div class="col-sm-10 col-md-8 col-lg-5 col-xl-4">
         <div class="text-center mb-7">
-          <img src="{{ asset('assets/img/icons/logo.png') }}" alt="" width="48" onerror="this.style.display='none'">
+          <img src="{{ url('media/assets/img/icons/logo.png?size=128') }}" alt="" width="48" onerror="this.style.display='none'">
           <h3 class="text-body-highlight mt-3">Portal Login</h3>
           <p class="text-body-tertiary">Enter your mobile number and password to continue</p>
         </div>

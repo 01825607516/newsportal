@@ -10,9 +10,12 @@ use App\Http\Controllers\Admin\RequestController as AdminRequestController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FallbackController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\ImageResizeController;
 use App\Http\Controllers\PortalAuthController;
 use App\Http\Controllers\PortalBillingController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/media/{path}', [ImageResizeController::class, 'show'])->where('path', '.*')->name('media.show');
 
 // ---------- Portal (tenant) side ----------
 Route::get('/login', [PortalAuthController::class, 'showLogin'])->name('portal.login');

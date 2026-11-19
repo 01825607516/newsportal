@@ -4,7 +4,12 @@ import { onMounted } from 'vue'
 const assetBase = (window.portalAssetBase || window.location.origin).replace(/\/+$/, '')
 
 function assetUrl(path) {
-  return `${assetBase}/${path.replace(/^(\.\.\/)+/, '')}`
+  const normalizedPath = path.replace(/^(\.\.\/)+/, '').replace(/^\/+/, '')
+  const isImage = /^assets\/img\/.+\.(?:jpe?g|png|gif|webp|bmp)$/i.test(normalizedPath)
+
+  return isImage
+    ? `${assetBase}/media/${normalizedPath}?size=420`
+    : `${assetBase}/${normalizedPath}`
 }
 
 const pageScripts = ["../vendors/popper/popper.min.js","../vendors/bootstrap/bootstrap.min.js","../vendors/anchorjs/anchor.min.js","../vendors/is/is.min.js","../vendors/fontawesome/all.min.js","../vendors/lodash/lodash.min.js","../vendors/list.js/list.min.js","../vendors/feather-icons/feather.min.js","../vendors/dayjs/dayjs.min.js","../vendors/choices/choices.min.js","../vendors/echarts/echarts.min.js","../vendors/dhtmlx-gantt/dhtmlxgantt.js","../vendors/flatpickr/flatpickr.min.js","../assets/js/phoenix.js","../assets/js/dashboards/projectmanagement-dashboard.js"].map(assetUrl)
@@ -22,7 +27,9 @@ function loadScript(src) {
 function resolveInlineAssetUrls() {
   document.querySelectorAll('#app [style*="../assets/"]').forEach((element) => {
     const style = element.getAttribute('style')
-    if (style) element.setAttribute('style', style.replace(/\.\.\/assets\//g, `${assetBase}/assets/`))
+    if (style) {
+      element.setAttribute('style', style.replace(/url\((['"]?)(\.\.\/assets\/[^)'"]+)\1\)/g, (_, quote, path) => `url(${quote}${assetUrl(path)}${quote})`))
+    }
   })
 }
 
