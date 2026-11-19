@@ -40,7 +40,7 @@ class CategoryController extends Controller
             ->get(['id', 'parent_id', 'level', 'title', 'name', 'en_name', 'key_name', 'keywords', 'description', 'image_path', 'status'])
             ->map(function ($row) {
                 $row->image_url = $row->image_path
-                    ? url('media/' . ltrim($row->image_path, '/') . '?size=420')
+                    ? url('/image/' . ltrim($row->image_path, '/\\')) . '?size=500'
                     : null;
 
                 return $row;

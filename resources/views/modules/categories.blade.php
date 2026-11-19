@@ -320,7 +320,7 @@
         return '<tr class="cat-row-l' + r.level + '">' +
             '<td class="ps-3"><div class="cat-name-cell" style="padding-left:' + indent + 'rem">' + caret +
                 (r.image_url
-                    ? '<img class="cat-image-thumb" src="' + esc(r.image_url) + '" alt="" loading="lazy">'
+                    ? '<img class="cat-image-thumb" src="' + esc(r.image_url) + '" alt="' + esc(r.name) + '" loading="lazy">'
                     : '<span class="cat-image-placeholder" aria-hidden="true"><span class="fas fa-image"></span></span>') +
                 '<div class="cat-title text-body-emphasis">' + esc(r.name) +
                 (r.en_name && r.en_name !== r.name ? ' <span class="fs-10 fw-normal text-body-tertiary ms-1">' + esc(r.en_name) + '</span>' : '') + '</div></div></td>' +
@@ -461,7 +461,6 @@
         el.form = document.getElementById('catForm');
         el.save = document.getElementById('cat-save');
         el.imagePreview = document.getElementById('cat-image-preview');
-
         document.getElementById('cat-search').addEventListener('input', function (e) { state.q = e.target.value.trim().toLowerCase(); render(); });
         document.getElementById('cat-status-filter').addEventListener('change', function (e) { state.status = e.target.value; render(); });
         document.getElementById('cat-add').addEventListener('click', function () { openForm(null, ''); });
