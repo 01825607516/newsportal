@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\PortalSupportController as AdminPortalSupportCont
 use App\Http\Controllers\Admin\RequestController as AdminRequestController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\FallbackController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PortalAuthController;
 use App\Http\Controllers\PortalBillingController;
 use Illuminate\Support\Facades\Route;
@@ -79,6 +80,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/packages/{package}', [AdminBillingController::class, 'updatePackage'])->name('packages.update');
     });
 });
+
+// Keep the original public image path in the URL while routing resize requests through Laravel.
+Route::get('/image/{path}', ImageController::class)
+    ->where('path', '.*')
+    ->name('image.resize');
+
+// Resize any public image in place, regardless of which public subfolder stores it.
+Route::get('/{path}', ImageController::class)
+    ->where('path', '.*\.(?:jpe?g|png|gif|webp|bmp)');
 
 // ---------- Anything else ----------
 // An address that does not exist lands on the right home page instead of a 404 error page (see FallbackController).
