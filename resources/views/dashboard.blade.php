@@ -7,6 +7,56 @@
     <title>Phoenix Project Management</title>
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url('media/assets/img/favicons/apple-touch-icon.png?size=180') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url('media/assets/img/favicons/favicon-32x32.png?size=32') }}">
+    {{-- Show a light shell (sidebar + header + content blocks) at once and reveal the real page in one go,
+         instead of content first and the sidebar / header popping in later. --}}
+    <script>
+      document.documentElement.classList.add('app-booting');
+      (function () {
+        var tasks = [], obs = null, queued = false;
+        function run() {
+          queued = false;
+          tasks = tasks.filter(function (t) { try { return !t(); } catch (e) { return false; } });
+          if (!tasks.length && obs) { obs.disconnect(); obs = null; }
+        }
+        // ONE shared observer for every "place this into the Phoenix page once Vue has drawn it" job.
+        window.portalWhenReady = function (fn) {
+          try { if (fn()) return; } catch (e) { return; }
+          tasks.push(fn);
+          if (obs) return;
+          obs = new MutationObserver(function () { if (!queued) { queued = true; requestAnimationFrame(run); } });
+          obs.observe(document.documentElement, { childList: true, subtree: true });
+        };
+        function finish() {
+          document.documentElement.classList.remove('app-booting');
+          var sk = document.getElementById('app-skeleton');
+          if (sk) sk.remove();
+        }
+        window.portalWhenReady(function () {
+          var vertical = document.documentElement.getAttribute('data-navigation-type') === 'default' || document.documentElement.getAttribute('data-navigation-type') === 'vertical';
+          if (!document.querySelector('#navbarDefault .navbar-logo') || !document.querySelector('#app .content')) return false;
+          if (vertical && !document.querySelector('#navbarVerticalNav')) return false;
+          finish();
+          return true;
+        });
+        window.setTimeout(finish, 4000); // never leave the page covered if something fails
+      })();
+    </script>
+    <style>
+      html.app-booting #app { opacity: 0; }
+      #app-skeleton { position: fixed; inset: 0; z-index: 2000; display: flex; background: var(--phoenix-body-bg, #fff); pointer-events: none; }
+      html:not(.app-booting) #app-skeleton { display: none; }
+      #app-skeleton .sk-side { flex: none; width: var(--phoenix-navbar-vertical-width, 15.875rem); padding: 1.25rem 1rem; border-right: 1px solid var(--phoenix-border-color, #e3e6ed); background: var(--phoenix-body-bg, #fff); }
+      #app-skeleton .sk-main { flex: 1; min-width: 0; }
+      #app-skeleton .sk-top { height: var(--phoenix-navbar-top-height, 3.5rem); display: flex; align-items: center; justify-content: space-between; padding: 0 1.5rem; border-bottom: 1px solid var(--phoenix-border-color, #e3e6ed); }
+      #app-skeleton .sk-body { padding: 1.5rem; display: grid; gap: 1rem; grid-template-columns: repeat(3, 1fr); }
+      #app-skeleton .sk-bar, #app-skeleton .sk-card { background: var(--phoenix-secondary-bg, #eff2f6); border-radius: .5rem; animation: sk-pulse 1.2s ease-in-out infinite; }
+      #app-skeleton .sk-bar { height: .75rem; margin-bottom: .9rem; }
+      #app-skeleton .sk-card { height: 7rem; }
+      #app-skeleton .sk-card.wide { grid-column: 1 / -1; height: 14rem; }
+      @keyframes sk-pulse { 50% { opacity: .45; } }
+      @media (max-width: 991.98px) { #app-skeleton .sk-side { display: none; } #app-skeleton .sk-body { grid-template-columns: 1fr; } }
+      @media (prefers-reduced-motion: reduce) { #app-skeleton .sk-bar, #app-skeleton .sk-card { animation: none; } }
+    </style>
     <script src="{{ asset('vendors/simplebar/simplebar.min.js') }}"></script>
     <script src="{{ asset('assets/js/config.js') }}"></script>
     <link href="{{ asset('vendors/choices/choices.min.css') }}" rel="stylesheet">
@@ -14,7 +64,7 @@
     <link href="{{ asset('vendors/flatpickr/flatpickr.min.css') }}" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com/">
     <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&amp;display=swap" rel="stylesheet"></noscript>
     <link href="{{ asset('vendors/simplebar/simplebar.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/css/theme-rtl.min.css') }}" rel="stylesheet" id="style-rtl">
     <link href="{{ asset('assets/css/theme.min.css') }}" rel="stylesheet" id="style-default">
@@ -35,6 +85,10 @@
     @vite('v1.23.0/src/project-management.js')
 </head>
 <body>
+<div id="app-skeleton" aria-hidden="true">
+    <div class="sk-side"><div class="sk-bar" style="width:55%;height:1.5rem;margin-bottom:2rem"></div><div class="sk-bar" style="width:80%"></div><div class="sk-bar" style="width:65%"></div><div class="sk-bar" style="width:75%"></div><div class="sk-bar" style="width:60%"></div><div class="sk-bar" style="width:70%"></div></div>
+    <div class="sk-main"><div class="sk-top"><div class="sk-bar" style="width:12rem;margin:0"></div><div class="sk-bar" style="width:8rem;margin:0"></div></div><div class="sk-body"><div class="sk-card"></div><div class="sk-card"></div><div class="sk-card"></div><div class="sk-card wide"></div></div></div>
+</div>
 @php
     $money = fn ($n) => '৳' . rtrim(rtrim(number_format($n, 2, '.', ','), '0'), '.');
     $b = $billing ?? null;
@@ -465,10 +519,7 @@
                 banner.classList.add('d-flex');
                 return true;
             };
-            if (!place()) {
-                var obs = new MutationObserver(function () { if (place()) obs.disconnect(); });
-                obs.observe(document.body, { childList: true, subtree: true });
-            }
+            window.portalWhenReady(place);
         }
     }
 
@@ -609,10 +660,7 @@
         return true;
     };
 
-    if (!place()) {
-        var obs = new MutationObserver(function () { if (place()) obs.disconnect(); });
-        obs.observe(document.body, { childList: true, subtree: true });
-    }
+    window.portalWhenReady(place);
 })();
 </script>
 
@@ -672,10 +720,7 @@
         return true;
     };
 
-    if (!place()) {
-        var obs = new MutationObserver(function () { if (place()) obs.disconnect(); });
-        obs.observe(document.body, { childList: true, subtree: true });
-    }
+    window.portalWhenReady(place);
 })();
 </script>
 </body>

@@ -18,6 +18,7 @@ function loadScript(src) {
   return new Promise((resolve, reject) => {
     const script = document.createElement('script')
     script.src = src
+    script.async = false
     script.onload = resolve
     script.onerror = reject
     document.body.appendChild(script)
@@ -35,8 +36,8 @@ function resolveInlineAssetUrls() {
 
 onMounted(async () => {
   resolveInlineAssetUrls()
-  for (const src of pageScripts) await loadScript(src)
   initializeNavigation()
+  await Promise.all(pageScripts.map(loadScript))
 })
 
 function initializeNavigation() {

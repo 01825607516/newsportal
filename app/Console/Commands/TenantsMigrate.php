@@ -12,7 +12,7 @@ use Throwable;
 class TenantsMigrate extends Command
 {
     protected $signature = 'tenants:migrate';
-    protected $description = 'Apply new database/tenant/migrations/*.sql files and refresh the views in every tenant database';
+    protected $description = 'Apply new database/tenant/migrations/*.sql files, refresh the views and seed missing first rows (e.g. the editor user) in every tenant database';
 
     public function handle(TenantProvisioner $provisioner): int
     {
@@ -30,6 +30,7 @@ class TenantsMigrate extends Command
 
                 $provisioner->runMigrations($tenant);
                 $provisioner->createViews($tenant);
+                app(config('tenancy.seeder'))->seed($tenant, $portal); // adds the editor to `users` if missing
 
                 $this->info("OK    {$portal->database_name}");
             } catch (Throwable $e) {

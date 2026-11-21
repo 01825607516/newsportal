@@ -30,6 +30,7 @@ When a portal signs up (`/signup`) `TenantProvisioner` creates `<TENANT_DB_PREFI
 | Repair / create one tenant DB | Admin panel > portal > "Create / repair tenant database" |
 | Add or change a view | edit `database/tenant/views.sql` (use `CREATE OR REPLACE VIEW`), run `php artisan tenants:sync-views` |
 | Change a table | add a file to `database/tenant/migrations/`, run `php artisan tenants:migrate` |
+| Change a MAIN-database table | add a `.sql` file in `database/main/` (see `database/main/README.md`; never run `artisan migrate`) |
 | Create an admin | `php artisan admin:create email password "Name"` |
 
 Reusing this for another system: replace `schema.sql` and `views.sql`, point `tenancy.seeder` to your

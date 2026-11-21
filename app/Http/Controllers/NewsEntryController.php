@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Services\SubscriptionService;
-use App\Services\PortalUserDirectory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,12 +22,13 @@ class NewsEntryController extends Controller
         return $billing->dashboard($request, $subs)->with(['module' => 'news-entry', 'newsTypes' => $types]);
     }
 
-    public function reporters(Request $request, PortalUserDirectory $directory): JsonResponse
+    public function reporters(): JsonResponse
     {
-        $portal = $request->attributes->get('portal');
-        $directory->syncTenantUsers($portal);
-        $rows = DB::table('portal_users')->where('portal_id', $portal->id)->where('is_portal_owner', false)
-            ->where('activated', 1)->where('banned', 0)->orderBy('user_full_name')->get(['id', 'user_full_name']);
+        // Reporter names already used on this portal's news (one row per reporter in news_writer_info).
+        $rows = DB::connection('tenant')->table('news_writer_info')
+            ->whereNotNull('author_name')->where('author_name', '<>', '')
+            ->distinct()->orderBy('author_name')->pluck('author_name')->values();
+
         return response()->json(['data' => $rows]);
     }
 
@@ -46,7 +46,7 @@ class NewsEntryController extends Controller
             'sections.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
             'sections.*.video_link' => ['nullable', 'url:http,https', 'max:255'], 'sections.*.is_cover' => ['nullable', 'boolean'],
             'tags' => ['nullable', 'array', 'max:20'], 'tags.*' => ['string', 'max:250'],
-            'reporter_ids' => ['nullable', 'array'], 'reporter_ids.*' => ['nullable', 'integer'], 'reporter_name' => ['nullable', 'string', 'max:100'],
+            'reporter_names' => ['nullable', 'array', 'max:20'], 'reporter_names.*' => ['nullable', 'string', 'max:100'], 'reporter_name' => ['nullable', 'string', 'max:250'],
             'news_source' => ['nullable', 'string', 'max:150'], 'news_source_link' => ['nullable', 'url:http,https', 'max:500'],
             'seo_title' => ['nullable', 'string', 'max:250'], 'seo_keyword' => ['nullable', 'string', 'max:350'], 'seo_description' => ['nullable', 'string', 'max:400'],
         ]);
@@ -63,15 +63,14 @@ class NewsEntryController extends Controller
         }
         if (!array_key_exists((int) $data['news_status'], config('news.status'))) $validator->errors()->add('news_status', 'Choose a valid status.');
         if (!$db->table('news_type_info')->where('news_type_id', $data['news_type'])->where('type_status', 1)->exists()) $validator->errors()->add('news_type', 'Choose an active news type.');
-        $reporterIds = array_values(array_unique(array_map('intval', array_filter(
-            $data['reporter_ids'] ?? [],
-            fn ($id) => $id !== null && $id !== ''
-        ))));
-        $data['reporter_ids'] = $reporterIds;
-        $data['reporter_name'] = trim((string) ($data['reporter_name'] ?? ''));
-        if ($reporterIds && DB::table('portal_users')->where('portal_id', $portalId)->whereIn('id', $reporterIds)->where('is_portal_owner', false)->where('activated', 1)->where('banned', 0)->count() !== count($reporterIds)) {
-            $validator->errors()->add('reporter_ids', 'Choose only active reporters.');
+        // Names picked in the dropdowns plus any new names typed in the box (several allowed, separated by commas).
+        $picked = array_merge($data['reporter_names'] ?? [], explode(',', (string) ($data['reporter_name'] ?? '')));
+        $reporterNames = [];
+        foreach ($picked as $name) {
+            $name = trim(preg_replace('/\s+/u', ' ', (string) $name));
+            if ($name !== '' && mb_strlen($name) <= 100) $reporterNames[mb_strtolower($name)] ??= $name;
         }
+        $reporterNames = array_values($reporterNames);
         $images = [];
         foreach ($data['sections'] as $i => $section) {
             if ($section['media_type'] == 1 && !$request->file("sections.{$i}.image")) $validator->errors()->add("sections.{$i}.image", 'Choose an image.');
@@ -82,24 +81,17 @@ class NewsEntryController extends Controller
             $covers = array_values(array_filter($images, fn ($i) => !empty($data['sections'][$i]['is_cover'])));
             if (count($covers) !== 1) $validator->errors()->add('sections', 'Choose exactly one cover image.');
         }
-        if ($data['reporter_name'] === '' && empty($reporterIds)) $validator->errors()->add('reporter_name', 'Choose at least one reporter or enter a reporter name.');
+        if (!$reporterNames) $validator->errors()->add('reporter_name', 'Choose at least one reporter or enter a reporter name.');
         if ($validator->errors()->isNotEmpty()) throw new ValidationException($validator);
 
-        $reporterRows = $reporterIds
-            ? DB::table('portal_users')->where('portal_id', $portalId)->whereIn('id', $reporterIds)
-                ->where('is_portal_owner', false)->where('activated', 1)->where('banned', 0)
-                ->get(['id', 'tenant_user_id', 'user_full_name'])
-            : collect();
         $zone = $db->table('app_config')->value('time_zone') ?: 'Asia/Dhaka';
         $now = now($zone);
         $written = [];
         try {
-            $id = $db->transaction(function () use ($db, $request, $data, $portalId, $now, $reporterRows, &$written) {
+            $id = $db->transaction(function () use ($db, $request, $data, $portalId, $now, $reporterNames, &$written) {
                 $coverIndex = null;
                 foreach ($data['sections'] as $i => $s) if (($s['media_type'] == 1) && !empty($s['is_cover'])) $coverIndex = $i;
-                $reporterNames = $reporterRows->pluck('user_full_name')->all();
-                $tenantReporterIds = $reporterRows->pluck('tenant_user_id')->all();
-                $reporterText = trim($data['reporter_name'] ?? '') ?: implode(', ', $reporterNames);
+                $reporterText = implode(', ', $reporterNames);
                 $id = $db->table('news_common_info')->insertGetId([
                     'news_headline' => $data['news_headline'], 'headline_tag' => $data['headline_tag'] ?? '', 'news_details_brief' => $data['news_details_brief'] ?? '',
                     'news_reporter' => mb_substr($reporterText, 0, 100), 'author_id' => null,
@@ -145,7 +137,7 @@ class NewsEntryController extends Controller
                 }
                 $db->table('news_info')->insert(['news_id' => $id, 'news_slug' => $slug, 'news_sub_headline' => $data['news_sub_headline'] ?? '', 'news_details' => $details, 'img_caption' => mb_substr($coverCaption, 0, 150), 'video_link' => null, 'video_caption' => null, 'audio_link' => null, 'audio_caption' => null, 'news_source' => $data['news_source'] ?? '', 'news_source_link' => $data['news_source_link'] ?? '', 'news_area' => null, 'news_zone' => null, 'copy_protection_status' => 0, 'division_id' => null, 'district_id' => null, 'upazila_id' => null]);
                 foreach (array_unique(array_filter(array_map('trim', $data['tags'] ?? []))) as $tag) $db->table('news_tag_info')->insert(['news_id' => $id, 'news_tag' => $tag, 'relevant_article' => '']);
-                $db->table('news_writer_info')->insert(['news_id' => $id, 'writer_type' => 1, 'author_ids' => null, 'reporter_ids' => implode(',', $tenantReporterIds)]);
+                foreach ($reporterNames as $reporterName) $db->table('news_writer_info')->insert(['news_id' => $id, 'writer_type' => 1, 'author_ids' => null, 'author_name' => $reporterName]);
                 $db->table('news_seo_info')->insert(['news_id' => $id, 'seo_title' => $data['seo_title'] ?? '', 'seo_keyword' => $data['seo_keyword'] ?? '', 'seo_description' => $data['seo_description'] ?? '']);
                 return $id;
             });
