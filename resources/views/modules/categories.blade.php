@@ -133,7 +133,7 @@
                             <label class="form-label" for="cat-f-image">Category image</label>
                             <input class="form-control" type="file" id="cat-f-image" name="image" accept="image/jpeg,image/png,image/webp,image/gif,image/bmp">
                             <div class="invalid-feedback"></div>
-                            <div class="form-text">JPG, PNG, WebP, GIF or BMP; maximum 5 MB. Leave empty to keep the current image.</div>
+                            <div class="form-text">JPG, PNG, WebP, GIF or BMP; maximum 5 MB. Uploaded images are saved as WebP. Leave empty to keep the current image.</div>
                             <img class="cat-image-preview d-none mt-2" id="cat-image-preview" alt="Category image preview">
                         </div>
                         <div class="col-12">

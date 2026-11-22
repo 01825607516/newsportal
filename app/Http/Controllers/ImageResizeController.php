@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AdImageComposer;
+use App\Support\ImageResizeNotice;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -9,21 +11,27 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ImageResizeController extends Controller
 {
-    private const MAX_WIDTH = 4096;
+    private const MAX_WIDTH = 5000;
     private const MAX_PIXELS = 20000000;
     private const MAX_SOURCE_BYTES = 20971520;
 
     public function show(Request $request, string $path): BinaryFileResponse|Response
     {
         $source = $this->resolveImagePath($path);
+        // AD=1: select an ad creative; if none exist, preserve the current image response.
+        $adComposer = $request->query('ad') === '1' ? app(AdImageComposer::class) : null;
+        $adFile = $adComposer?->pickAdImage();
         $size = $request->query('size');
 
-        if ($size === null) {
+        if ($size === null && $adFile === null) {
             return response()->file($source, $this->headers());
         }
 
-        if (!is_scalar($size) || !preg_match('/^[1-9][0-9]{0,3}$/', (string) $size) || (int) $size > self::MAX_WIDTH) {
+        if ($size !== null && (!is_scalar($size) || !ctype_digit((string) $size) || (int) $size < 1)) {
             abort(400, 'The size parameter must be a width between 1 and ' . self::MAX_WIDTH . ' pixels.');
+        }
+        if ($size !== null && (int) $size > self::MAX_WIDTH) {
+            return ImageResizeNotice::aboveLimit(self::MAX_WIDTH);
         }
 
         if (!extension_loaded('gd')) {
@@ -41,43 +49,60 @@ class ImageResizeController extends Controller
         }
 
         $mime = $imageInfo['mime'] ?? '';
-        [$extension, $loader] = match ($mime) {
-            'image/jpeg' => ['jpg', 'imagecreatefromjpeg'],
-            'image/png' => ['png', 'imagecreatefrompng'],
-            'image/gif' => ['gif', 'imagecreatefromgif'],
-            'image/webp' => ['webp', 'imagecreatefromwebp'],
-            'image/bmp', 'image/x-ms-bmp' => ['bmp', 'imagecreatefrombmp'],
+        $loader = match ($mime) {
+            'image/jpeg' => 'imagecreatefromjpeg',
+            'image/png' => 'imagecreatefrompng',
+            'image/gif' => 'imagecreatefromgif',
+            'image/webp' => 'imagecreatefromwebp',
+            'image/bmp', 'image/x-ms-bmp' => 'imagecreatefrombmp',
             default => abort(415, 'This image format cannot be resized.'),
         };
 
-        if ($width <= (int) $size) {
-            return response()->file($source, $this->headers($mime));
-        }
-
-        $encoder = match ($mime) {
-            'image/jpeg' => 'imagejpeg',
-            'image/png' => 'imagepng',
-            'image/gif' => 'imagegif',
-            'image/webp' => 'imagewebp',
-            'image/bmp', 'image/x-ms-bmp' => 'imagebmp',
-        };
-
-        if (!function_exists($loader) || !function_exists($encoder)) {
+        if (!function_exists($loader) || ($adFile === null && !function_exists('imagewebp'))) {
             abort(415, 'This image format is not supported by the installed PHP GD extension.');
         }
 
         $cacheDirectory = storage_path('app/image-cache');
         File::ensureDirectoryExists($cacheDirectory);
-        $cachePath = $cacheDirectory . DIRECTORY_SEPARATOR . hash('sha256', 'v2|' . $source . '|' . filemtime($source) . '|' . filesize($source) . '|' . $size) . '.' . $extension;
+        $targetWidth = $size === null ? $width : min((int) $size, $width);
+        $targetHeight = $size === null ? $height : max(1, (int) round($height * $targetWidth / $width));
+        $format = match ($mime) {
+            'image/jpeg' => 'jpeg',
+            'image/webp' => 'webp',
+            default => 'png',
+        };
+        $cacheKey = 'v3|' . $source . '|' . filemtime($source) . '|' . filesize($source) . '|' . $size;
+        if ($adFile !== null) {
+            // AD=1: use a separate cached file for this selected creative.
+            $cacheKey .= '|ad-v9|' . $adFile . '|' . filemtime($adFile) . '|' . filesize($adFile);
+        }
+        $extension = $adFile !== null ? $format : 'webp';
+        $cachePath = $cacheDirectory . DIRECTORY_SEPARATOR . hash('sha256', $cacheKey) . '.' . $extension;
 
         if (!is_file($cachePath)) {
+            if ($adFile !== null) {
+                try {
+                    // AD=1: return a composed response without changing the source file.
+                    $geometry = [0, 0, $width, $height, $targetWidth, $targetHeight];
+                    $contents = $adComposer->compose($source, $adFile, $geometry, $format);
+                } catch (\RuntimeException $e) {
+                    abort(422, $e->getMessage());
+                }
+
+                $tmp = $cachePath . '.' . bin2hex(random_bytes(4)) . '.tmp';
+                if (@file_put_contents($tmp, $contents) !== false && @rename($tmp, $cachePath)) {
+                    return response()->file($cachePath, $this->headers($format === 'jpeg' ? 'image/jpeg' : 'image/' . $format));
+                }
+                @unlink($tmp);
+
+                return response($contents, 200, $this->headers($format === 'jpeg' ? 'image/jpeg' : 'image/' . $format));
+            }
+
             $sourceImage = $loader($source);
             if ($sourceImage === false) {
                 abort(415, 'The requested image could not be decoded.');
             }
 
-            $targetWidth = (int) $size;
-            $targetHeight = max(1, (int) round($height * $targetWidth / $width));
             $targetImage = imagecreatetruecolor($targetWidth, $targetHeight);
             if ($targetImage === false) {
                 imagedestroy($sourceImage);
@@ -110,14 +135,7 @@ class ImageResizeController extends Controller
                 }
             }
 
-            $saved = match ($mime) {
-                'image/jpeg' => imagejpeg($targetImage, $cachePath, 95),
-                'image/png' => imagepng($targetImage, $cachePath, 6),
-                'image/gif' => imagegif($targetImage, $cachePath),
-                'image/webp' => imagewebp($targetImage, $cachePath, 95),
-                'image/bmp', 'image/x-ms-bmp' => imagebmp($targetImage, $cachePath),
-                default => false,
-            };
+            $saved = imagewebp($targetImage, $cachePath, 82);
             imagedestroy($targetImage);
 
             if (!$saved) {
@@ -125,7 +143,8 @@ class ImageResizeController extends Controller
             }
         }
 
-        return response()->file($cachePath, $this->headers($mime));
+        $responseMime = $adFile !== null ? ($format === 'jpeg' ? 'image/jpeg' : 'image/' . $format) : 'image/webp';
+        return response()->file($cachePath, $this->headers($responseMime));
     }
 
     private function resolveImagePath(string $path): string
