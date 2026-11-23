@@ -69,6 +69,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('/portals/{portal}', [AdminPortalController::class, 'update'])->name('portals.update');
         Route::post('/portals/{portal}/toggle', [AdminPortalController::class, 'toggleStatus'])->name('portals.toggle');
         Route::post('/portals/{portal}/provision', [AdminPortalController::class, 'reprovision'])->name('portals.provision');
+        Route::post('/portals/{portal}/api-token', [AdminPortalController::class, 'issueApiToken'])->name('portals.api-token.issue');
+        Route::delete('/portals/{portal}/api-token', [AdminPortalController::class, 'revokeApiToken'])->name('portals.api-token.revoke');
         Route::delete('/portals/{portal}', [AdminPortalController::class, 'destroy'])->name('portals.destroy');
 
         // Billing (manual payments)

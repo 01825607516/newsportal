@@ -17,3 +17,8 @@ The main database is the one imported from `sample.sql`. sqlite is no longer use
 - Tenant databases are still created and changed by `database/tenant/schema.sql` and `database/tenant/migrations/`
   (`php artisan tenants:migrate`).
 - A change to a main-database table = a new `.sql` file in this folder.
+
+## Public API token (added later)
+Import `2026_11_23_000001_add_api_token_to_portals.sql` into the main database once (safe to repeat).
+It adds the token columns to `portals`. Then create a token in the admin panel (portal page > "Public API token")
+or with `php artisan portal:api-token <portal id>`. See `docs/PORTAL_API.md`.

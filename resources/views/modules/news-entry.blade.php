@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="{{ asset('vendors/summernote/summernote-lite.min.css') }}">
 <style>
-.news-module .news-section-card{border:1px solid var(--phoenix-border-color);border-radius:.5rem;padding:1rem;margin-bottom:1rem}.news-module .news-preview{width:5rem;height:4rem;object-fit:cover;border-radius:.35rem}.news-module .note-editor{border-color:var(--phoenix-border-color);background:var(--phoenix-emphasis-bg)}.news-module .note-toolbar,.news-module .note-editing-area,.news-module .note-statusbar{background:var(--phoenix-card-bg);color:var(--phoenix-body-color);border-color:var(--phoenix-border-color)}.news-module .note-editable{color:var(--phoenix-body-color)}.news-toast{position:fixed;top:5rem;left:50%;transform:translateX(-50%);z-index:2100;width:min(34rem,92vw)}
+.news-module .news-section-card{border:1px solid var(--phoenix-border-color);border-radius:.5rem;padding:1rem;margin-bottom:1rem}.news-module .news-preview{width:5rem;height:4rem;object-fit:cover;border-radius:.35rem}.news-module .note-editor{border-color:var(--phoenix-border-color);background:var(--phoenix-emphasis-bg)}.news-module .note-toolbar,.news-module .note-editing-area,.news-module .note-statusbar{background:var(--phoenix-card-bg);color:var(--phoenix-body-color);border-color:var(--phoenix-border-color)}.news-module .note-editable{color:var(--phoenix-body-color)}.news-module .news-save-button{position:fixed;top:calc(var(--phoenix-navbar-top-height, 4rem) + 1.5rem);right:1.5rem;z-index:1030}.news-toast{position:fixed;top:5rem;left:50%;transform:translateX(-50%);z-index:2100;width:min(34rem,92vw)}
 </style>
 <div id="news-config" class="d-none" data-categories="{{ route('categories.data') }}" data-reporters="{{ route('news.reporters') }}" data-store="{{ route('news.store') }}"></div>
 <template id="news-section-template">
@@ -17,7 +17,7 @@
 </template>
 <template id="news-module-template">
 <div class="news-module">
- <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4"><div><h2 class="mb-1 text-body-emphasis">News Entry</h2><p class="mb-0 text-body-tertiary">Create and publish a news story</p></div><button type="submit" form="news-form" class="btn btn-primary">Save news</button></div>
+ <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4"><div><h2 class="mb-1 text-body-emphasis">News Entry</h2><p class="mb-0 text-body-tertiary">Create and publish a news story</p></div><button type="submit" form="news-form" class="btn btn-primary news-save-button">Save news</button></div>
  <form id="news-form" novalidate>
   <div class="card mb-3"><div class="card-header"><h4 class="card-title mb-0">Category</h4></div><div class="card-body"><div class="row g-3">
    <div class="col-md-4"><label class="form-label">Category <span class="text-danger">*</span></label><select class="form-select" name="cat_id" data-cat-level="1" required><option value="">Choose category</option></select><div class="invalid-feedback"></div></div>
@@ -44,7 +44,6 @@
   </div></div>
   <div class="card mb-3"><div class="card-header"><h4 class="card-title mb-0">News source</h4></div><div class="card-body row g-3"><div class="col-md-6"><label class="form-label">Source</label><input class="form-control" name="news_source" maxlength="150"><div class="invalid-feedback"></div></div><div class="col-md-6"><label class="form-label">Source link</label><input class="form-control" name="news_source_link" type="url" maxlength="500"><div class="invalid-feedback"></div></div></div></div>
   <div class="card mb-4"><div class="card-header"><h4 class="card-title mb-0">SEO</h4></div><div class="card-body row g-3"><div class="col-12"><label class="form-label">SEO title</label><input class="form-control" name="seo_title" maxlength="250"><div class="invalid-feedback"></div></div><div class="col-12"><label class="form-label">SEO keywords</label><input class="form-control" name="seo_keyword" maxlength="350"><div class="invalid-feedback"></div></div><div class="col-12"><label class="form-label">SEO description</label><textarea class="form-control" name="seo_description" maxlength="400" rows="3"></textarea><div class="invalid-feedback"></div></div></div></div>
-  <div class="d-flex justify-content-end mb-5"><button type="submit" class="btn btn-primary">Save news</button></div>
  </form>
 </div></template>
 <div class="news-toast d-none" data-news-toast></div>

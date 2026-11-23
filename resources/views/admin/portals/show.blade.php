@@ -71,6 +71,27 @@
         <button class="btn btn-primary mt-4" type="submit">Save changes</button>
       </form>
     </div></div>
+
+    <div class="card mt-4">
+      <div class="card-header"><h5 class="mb-0">Admin support audit</h5></div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead><tr><th>Admin</th><th>Action</th><th>Page</th><th>When</th></tr></thead>
+          <tbody>
+          @forelse ($supportEvents as $event)
+            <tr>
+              <td>{{ $event->supportSession->admin_name }}</td>
+              <td>{{ ucfirst(str_replace('_', ' ', $event->action)) }}</td>
+              <td><code>{{ $event->path ?: '—' }}</code></td>
+              <td class="fs-9">{{ $event->created_at?->format('d M Y H:i:s') }}</td>
+            </tr>
+          @empty
+            <tr><td colspan="4" class="text-center text-body-tertiary py-4">No admin support sessions yet.</td></tr>
+          @endforelse
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <div class="col-lg-5">
@@ -90,6 +111,60 @@
       </form>
     </div></div>
 
+    <div class="card mb-4"><div class="card-body">
+      <div class="d-flex align-items-center justify-content-between mb-1">
+        <h5 class="mb-0">Public API token</h5>
+        @if ($portal->hasApiToken())
+          <span class="badge badge-phoenix badge-phoenix-success">Active</span>
+        @else
+          <span class="badge badge-phoenix badge-phoenix-secondary">Not created</span>
+        @endif
+      </div>
+      <p class="fs-9 text-body-tertiary mb-3">Read-only access to this portal's database with a secret token.</p>
+
+      @if (session('new_api_token'))
+        @php($newToken = session('new_api_token'))
+        <div class="alert alert-subtle-warning p-3 mb-3">
+          <div class="fs-9 fw-semibold mb-2">Copy now &mdash; this token is shown only once</div>
+          <div class="input-group input-group-sm mb-2">
+            <input id="newApiToken" type="text" class="form-control font-monospace" value="{{ $newToken }}" readonly onclick="this.select()">
+            <button class="btn btn-phoenix-secondary" type="button" onclick="copyApiText('newApiToken', this)">Copy</button>
+          </div>
+        </div>
+      @endif
+
+      @if ($portal->hasApiToken())
+        <div class="border rounded-2 px-3 py-2 mb-3 fs-9">
+          <div class="d-flex justify-content-between py-1"><span class="text-body-tertiary">Token</span><span class="font-monospace">npk_&hellip;{{ $portal->api_token_last4 }}</span></div>
+          <div class="d-flex justify-content-between py-1"><span class="text-body-tertiary">Created</span><span>{{ $portal->api_token_created_at?->format('d M Y H:i') ?? '—' }}</span></div>
+          <div class="d-flex justify-content-between py-1"><span class="text-body-tertiary">Last used</span><span>{{ $portal->api_token_last_used_at?->format('d M Y H:i') ?? 'never' }}</span></div>
+        </div>
+      @else
+        <p class="fs-9 mb-3">No token yet, so the API is closed for this portal.</p>
+      @endif
+
+      <div class="d-flex flex-wrap gap-2">
+        <form method="POST" action="{{ route('admin.portals.api-token.issue', $portal) }}"
+              @if ($portal->hasApiToken()) data-confirm="This replaces the current token. Anything using the old token stops working. Continue?" @endif>@csrf
+          <button class="btn btn-sm btn-phoenix-secondary" type="submit">{{ $portal->hasApiToken() ? 'Regenerate token' : 'Create API token' }}</button>
+        </form>
+        @if ($portal->hasApiToken())
+          <form method="POST" action="{{ route('admin.portals.api-token.revoke', $portal) }}" data-confirm="Revoke the token? The API closes for this portal.">@csrf @method('DELETE')
+            <button class="btn btn-sm btn-phoenix-danger" type="submit">Revoke</button>
+          </form>
+        @endif
+      </div>
+    </div></div>
+    <script>
+      window.copyApiText = window.copyApiText || function (id, btn) {
+        var el = document.getElementById(id), label = btn.textContent;
+        el.select();
+        try { navigator.clipboard.writeText(el.value); } catch (e) { document.execCommand('copy'); }
+        btn.textContent = 'Copied';
+        setTimeout(function () { btn.textContent = label; }, 1500);
+      };
+    </script>
+
     <div class="card border-danger"><div class="card-body">
       <h5 class="mb-2 text-danger">Danger zone</h5>
       <p class="fs-9 text-body-tertiary">Deleting removes the portal and drops its tenant database. This cannot be undone.</p>
@@ -100,6 +175,7 @@
       </form>
     </div></div>
   </div>
+
 </div>
 
 @elseif ($tab === 'billing')
@@ -145,24 +221,4 @@
   @include('admin.partials._activity_table', ['logs' => $logs, 'showPortal' => false])
 @endif
 
-<div class="card mt-4">
-  <div class="card-header"><h5 class="mb-0">Admin support audit</h5></div>
-  <div class="table-responsive">
-    <table class="table table-hover mb-0 align-middle">
-      <thead><tr><th>Admin</th><th>Action</th><th>Page</th><th>When</th></tr></thead>
-      <tbody>
-      @forelse ($supportEvents as $event)
-        <tr>
-          <td>{{ $event->supportSession->admin_name }}</td>
-          <td>{{ ucfirst(str_replace('_', ' ', $event->action)) }}</td>
-          <td><code>{{ $event->path ?: '—' }}</code></td>
-          <td class="fs-9">{{ $event->created_at?->format('d M Y H:i:s') }}</td>
-        </tr>
-      @empty
-        <tr><td colspan="4" class="text-center text-body-tertiary py-4">No admin support sessions yet.</td></tr>
-      @endforelse
-      </tbody>
-    </table>
-  </div>
-</div>
 @endsection

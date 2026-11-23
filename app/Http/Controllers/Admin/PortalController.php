@@ -137,6 +137,26 @@ class PortalController extends Controller
         return back()->with('success', 'Tenant database is ready.');
     }
 
+    /** Create (or replace) the public API token. The plain token is flashed once and never stored. */
+    public function issueApiToken(Portal $portal)
+    {
+        if (!$portal->isProvisioned()) {
+            return back()->withErrors(['provision' => 'Create the tenant database first, then create the API token.']);
+        }
+
+        $token = $portal->issueApiToken();
+
+        return back()->with('success', 'New API token created. Copy it now - it cannot be shown again.')
+            ->with('new_api_token', $token);
+    }
+
+    public function revokeApiToken(Portal $portal)
+    {
+        $portal->revokeApiToken();
+
+        return back()->with('success', 'API token revoked. The API is now closed for this portal.');
+    }
+
     public function destroy(Portal $portal, TenantProvisioner $provisioner)
     {
         try {

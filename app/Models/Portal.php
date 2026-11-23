@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Portal extends Model
 {
@@ -12,12 +13,14 @@ class Portal extends Model
         'database_name', 'status', 'provisioned_at', 'provision_error', 'last_login_at',
     ];
 
-    protected $hidden = ['password'];
+    protected $hidden = ['password', 'api_token_hash'];
 
     protected $casts = [
         'password' => 'hashed',
         'provisioned_at' => 'datetime',
         'last_login_at' => 'datetime',
+        'api_token_created_at' => 'datetime',
+        'api_token_last_used_at' => 'datetime',
     ];
 
     public const MOBILE_REGEX = '/^(?:\+?88)?01[3-9]\d{8}$/';
@@ -62,6 +65,39 @@ class Portal extends Model
     public function supportSessions(): HasMany
     {
         return $this->hasMany(PortalSupportSession::class);
+    }
+
+    /**
+     * Create a new public-API token for this portal (the old one stops working at once).
+     * Only the SHA-256 hash is stored, so the returned plain token can never be shown again.
+     */
+    public function issueApiToken(): string
+    {
+        $token = 'npk_' . Str::random(max(16, (int) config('portal_api.token_length', 20)));
+
+        $this->forceFill([
+            'api_token_hash' => hash('sha256', $token),
+            'api_token_last4' => substr($token, -4),
+            'api_token_created_at' => now(),
+            'api_token_last_used_at' => null,
+        ])->save();
+
+        return $token;
+    }
+
+    public function revokeApiToken(): void
+    {
+        $this->forceFill([
+            'api_token_hash' => null,
+            'api_token_last4' => null,
+            'api_token_created_at' => null,
+            'api_token_last_used_at' => null,
+        ])->save();
+    }
+
+    public function hasApiToken(): bool
+    {
+        return $this->api_token_hash !== null;
     }
 
     public function isProvisioned(): bool
