@@ -11,6 +11,7 @@ use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class BillingController extends Controller
 {
@@ -92,7 +93,7 @@ class BillingController extends Controller
 
     public function packages()
     {
-        return view('admin.packages.index', ['packages' => Package::orderBy('is_trial', 'desc')->orderBy('price')->get()]);
+        return Inertia::render('Admin/Packages/Index', ['packages' => Package::orderBy('is_trial', 'desc')->orderBy('price')->get()]);
     }
 
     public function storePackage(Request $request)

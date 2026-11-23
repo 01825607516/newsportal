@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Inertia\Inertia;
 
 class AuthController extends Controller
 {
@@ -13,7 +14,7 @@ class AuthController extends Controller
     {
         return $request->session()->has('admin_id')
             ? redirect()->route('admin.dashboard')
-            : response()->view('admin.login')->withHeaders(['Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0']);
+            : Inertia::render('Admin/Login');
     }
 
     public function login(Request $request)

@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [
     laravel({
-      input: ['v1.23.0/src/project-management.js'],
+      input: ['resources/js/app.js', 'v1.23.0/src/project-management.js'],
       refresh: true,
     }),
     vue(),

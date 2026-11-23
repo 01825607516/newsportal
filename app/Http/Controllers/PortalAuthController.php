@@ -6,8 +6,8 @@ use App\Models\Portal;
 use App\Services\ActivityMonitor;
 use App\Services\SubscriptionService;
 use App\Services\TenantProvisioner;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Throwable;
@@ -20,7 +20,7 @@ class PortalAuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return response()->view('portal.login')->withHeaders(['Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0']);
+        return Inertia::render('Portal/Login');
     }
 
     public function showSignup(Request $request)
@@ -29,7 +29,7 @@ class PortalAuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return response()->view('portal.signup')->withHeaders(['Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0']);
+        return Inertia::render('Portal/Signup');
     }
 
     /**

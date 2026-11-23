@@ -7,6 +7,7 @@ use App\Models\Portal;
 use App\Models\PortalActivity;
 use App\Services\ActivityMonitor;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ActivityController extends Controller
 {
@@ -22,7 +23,7 @@ class ActivityController extends Controller
             ->orderByDesc('created_at')->orderByDesc('id')
             ->paginate(30)->withQueryString();
 
-        return view('admin.activity.index', [
+        return Inertia::render('Admin/Activity/Index', [
             'logs' => $logs,
             'ranges' => ActivityMonitor::RANGES,
             'portals' => Portal::orderBy('portal_name')->limit(300)->get(['id', 'portal_name']),

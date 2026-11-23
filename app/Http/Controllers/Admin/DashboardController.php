@@ -6,12 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\Portal;
 use App\Models\PortalActivity;
 use App\Services\ActivityMonitor;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
     public function index(ActivityMonitor $monitor)
     {
-        return view('admin.dashboard', [
+        return Inertia::render('Admin/Dashboard', [
             'stats' => [
                 'total' => Portal::count(),
                 'active' => Portal::where('status', 'active')->count(),

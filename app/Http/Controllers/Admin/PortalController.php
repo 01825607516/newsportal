@@ -13,6 +13,7 @@ use App\Services\TenantManager;
 use App\Services\TenantProvisioner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 use Throwable;
 
 class PortalController extends Controller
@@ -42,7 +43,7 @@ class PortalController extends Controller
             'unprovisioned' => Portal::whereNull('provisioned_at')->count(),
         ];
 
-        return view('admin.portals.index', compact('portals', 'stats', 'q', 'status'));
+        return Inertia::render('Admin/Portals/Index', compact('portals', 'stats', 'q', 'status'));
     }
 
     public function show(Request $request, Portal $portal, SubscriptionService $subs, ActivityMonitor $monitor)
@@ -92,7 +93,7 @@ class PortalController extends Controller
             $data['ranges'] = ActivityMonitor::RANGES;
         }
 
-        return view('admin.portals.show', $data);
+        return Inertia::render('Admin/Portals/Show', $data);
     }
 
     public function update(Request $request, Portal $portal)

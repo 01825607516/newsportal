@@ -11,6 +11,7 @@ use App\Models\PurchaseRequest;
 use App\Services\SubscriptionService;
 use App\Services\TenantManager;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 /**
  * Portal-side subscription screens: the dashboard (with the "expiring soon" banner),
@@ -30,7 +31,7 @@ class PortalBillingController extends Controller
             ->latest('started_at')
             ->first();
 
-        return view('dashboard', [
+        return Inertia::render('Portal/Dashboard', [
             'billing' => $this->panel($portal, $subs),
             'activeSupportSession' => $activeSupportSession,
         ]);
@@ -45,7 +46,7 @@ class PortalBillingController extends Controller
         TenantManager::connect($portal);
         $billing = $this->panel($portal, $subs);
 
-        return view('dashboard', [
+        return Inertia::render('Portal/Dashboard', [
             'billing' => $billing,
             'currentPortal' => $portal,
             'subscriptionInfo' => $billing['info'],

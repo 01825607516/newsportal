@@ -2,24 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class NewsEntryController extends Controller
 {
-    public function create(Request $request, SubscriptionService $subs, PortalBillingController $billing)
+    public function create()
     {
         $types = DB::connection('tenant')->table('news_type_info')->where('type_status', 1)
             ->orderBy('news_type_id')->get(['news_type_id', 'type_name']);
 
-        return $billing->dashboard($request, $subs)->with(['module' => 'news-entry', 'newsTypes' => $types]);
+        return Inertia::render('Portal/Module', [
+            'module' => 'news-entry',
+            'html' => view('modules.news-entry', ['newsTypes' => $types])->render(),
+        ]);
     }
 
     public function reporters(): JsonResponse

@@ -1,0 +1,14 @@
+<script setup>
+import AdminLayout from '../../AdminLayout.vue'
+import { Link } from '@inertiajs/vue3'
+defineOptions({ layout: AdminLayout })
+defineProps({ portals: Object, stats: Object, q: String, status: String })
+</script>
+
+<template>
+  <div>
+    <div class="row g-3 mb-4"><div v-for="[label,value] in [['Total portals',stats.total],['Active',stats.active],['Suspended',stats.suspended],['DB not ready',stats.unprovisioned]]" :key="label" class="col-6 col-xl-3"><div class="card"><div class="card-body"><div class="stat-label">{{ label }}</div><div class="stat-value">{{ value }}</div></div></div></div></div>
+    <form class="card mb-3" method="get"><div class="card-body row g-2 align-items-center"><div class="col"><input class="form-control" name="q" :value="q" placeholder="Search portal, editor, email, mobile or registration"></div><div class="col-auto"><select name="status" class="form-select"><option value="">All statuses</option><option value="active" :selected="status==='active'">Active</option><option value="suspended" :selected="status==='suspended'">Suspended</option></select></div><div class="col-auto"><button class="btn btn-primary">Filter</button></div><div v-if="q || status" class="col-auto"><Link href="/admin/portals" class="btn btn-phoenix-secondary">Clear</Link></div></div></form>
+    <div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0"><thead><tr><th>ID</th><th>Portal</th><th>Editor</th><th>Mobile</th><th>Database</th><th>Status</th><th>Last login</th><th></th></tr></thead><tbody><tr v-for="p in portals.data" :key="p.id"><td>{{ p.id }}</td><td><b>{{ p.portal_name }}</b><div v-if="p.portal_reg_no" class="small text-body-tertiary">Reg. {{ p.portal_reg_no }}</div></td><td>{{ p.editor_name || 'Not provided' }}<div v-if="p.editor_email" class="small text-body-tertiary">{{ p.editor_email }}</div></td><td>{{ p.editor_mobile }}</td><td><code v-if="p.provisioned_at">{{ p.database_name }}</code><span v-else class="badge badge-phoenix-warning">not ready</span></td><td><span class="badge" :class="p.status==='active'?'badge-phoenix-success':'badge-phoenix-danger'">{{ p.status }}</span></td><td>{{ p.last_login_at || 'Never' }}</td><td><Link :href="`/admin/portals/${p.id}`" class="btn btn-sm btn-phoenix-primary">Manage</Link></td></tr><tr v-if="!portals.data.length"><td colspan="8" class="text-center py-5">No portals match these filters.</td></tr></tbody></table></div><div class="card-footer d-flex justify-content-between align-items-center"><span>{{ portals.total }} portal(s) · page {{ portals.current_page }} / {{ portals.last_page }}</span><div class="d-flex gap-2"><Link v-if="portals.prev_page_url" :href="portals.prev_page_url" class="btn btn-sm btn-phoenix-secondary">Previous</Link><Link v-if="portals.next_page_url" :href="portals.next_page_url" class="btn btn-sm btn-phoenix-secondary">Next</Link></div></div></div>
+  </div>
+</template>

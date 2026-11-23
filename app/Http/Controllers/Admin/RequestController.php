@@ -10,6 +10,7 @@ use App\Services\SubscriptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 /** Admin side of the portal "grace period" and "renew / purchase" requests. */
 class RequestController extends Controller
@@ -31,7 +32,7 @@ class RequestController extends Controller
             });
         };
 
-        return view('admin.requests.index', [
+        return Inertia::render('Admin/Requests/Index', [
             'q' => $q,
             'renewalStatus' => $renewalStatus,
             'graceStatus' => $graceStatus,
