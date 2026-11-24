@@ -8,7 +8,7 @@ const frame = ref(null)
 
 const bridgeScript = `<script>
 (function () {
-  function send(payload) { window.parent.postMessage(payload, '*'); }
+  function send(payload) { window.parent.postMessage(payload, window.parent.location.origin); }
 
   var nativeSubmit = HTMLFormElement.prototype.submit;
   HTMLFormElement.prototype.submit = function () {
@@ -21,8 +21,9 @@ const bridgeScript = `<script>
     var link = event.target.closest && event.target.closest('a[href]');
     if (!link || link.target || link.hasAttribute('download')) return;
     var url;
-    try { url = new URL(link.href, window.location.href); } catch (error) { return; }
-    if (url.origin !== window.location.origin || url.hash && url.pathname === window.location.pathname && url.search === window.location.search) return;
+    try { url = new URL(link.getAttribute('href'), window.parent.location.href); } catch (error) { return; }
+    var parentUrl = new URL(window.parent.location.href);
+    if (url.origin !== parentUrl.origin || url.hash && url.pathname === parentUrl.pathname && url.search === parentUrl.search) return;
     if (link.getAttribute('href').charAt(0) === '#') return;
     event.preventDefault();
     send({ type: 'inertia-link', url: url.href });
@@ -34,8 +35,13 @@ const bridgeScript = `<script>
     if (!(form instanceof HTMLFormElement)) return;
     var submitter = event.submitter;
     var url;
-    try { url = new URL(submitter && submitter.formAction || form.action || window.location.href, window.location.href); } catch (error) { return; }
-    if (url.origin !== window.location.origin) return;
+    // srcdoc documents resolve relative form actions against "about:srcdoc". Resolve
+    // the action against the real page URL instead, otherwise POSTs can land on /srcdoc.
+    try {
+      var action = submitter && submitter.getAttribute('formaction') || form.getAttribute('action') || window.parent.location.href;
+      url = new URL(action, window.parent.location.href);
+    } catch (error) { return; }
+    if (url.origin !== window.parent.location.origin) return;
     event.preventDefault();
     var formData = new FormData(form);
     if (submitter && submitter.name) formData.append(submitter.name, submitter.value);
@@ -58,7 +64,7 @@ const srcdoc = computed(() => {
 const pageTitle = computed(() => new DOMParser().parseFromString(props.html, 'text/html').title || 'News Portal')
 
 function onMessage(event) {
-  if (event.source !== frame.value?.contentWindow || !event.data || typeof event.data !== 'object') return
+  if (event.origin !== window.location.origin || event.source !== frame.value?.contentWindow || !event.data || typeof event.data !== 'object') return
 
   if (event.data.type === 'inertia-link' && typeof event.data.url === 'string') {
     router.visit(event.data.url)
@@ -73,7 +79,7 @@ function onMessage(event) {
 
   if (method === 'get') {
     const url = new URL(event.data.url, window.location.href)
-    for (const [key, value] of data.entries()) url.searchParams.append(key, value)
+    for (const [key, value] of event.data.entries) url.searchParams.append(key, value)
     router.visit(url.href)
     return
   }
@@ -81,6 +87,7 @@ function onMessage(event) {
   router.visit(event.data.url, {
     method,
     data,
+    // Keep HTML form semantics for bracketed array fields and file inputs.
     forceFormData: true,
   })
 }
