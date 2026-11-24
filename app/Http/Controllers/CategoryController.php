@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Inertia\Inertia;
+use App\Services\SubscriptionService;
 use Throwable;
 
 /**
@@ -28,12 +28,9 @@ class CategoryController extends Controller
     }
 
     /** The page: the normal dashboard shell with the category module in the content area. */
-    public function index()
+    public function index(Request $request, SubscriptionService $subs, PortalBillingController $billing)
     {
-        return Inertia::render('Portal/Module', [
-            'module' => 'categories',
-            'html' => view('modules.categories')->render(),
-        ]);
+        return $billing->renderPortalPage($request, $subs, ['module' => 'categories']);
     }
 
     public function data(): JsonResponse

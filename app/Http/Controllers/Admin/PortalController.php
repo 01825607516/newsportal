@@ -43,7 +43,7 @@ class PortalController extends Controller
             'unprovisioned' => Portal::whereNull('provisioned_at')->count(),
         ];
 
-        return Inertia::render('Admin/Portals/Index', compact('portals', 'stats', 'q', 'status'));
+        return Inertia::render('LegacyPage', ['html' => view('admin.portals.index', compact('portals', 'stats', 'q', 'status'))->render()]);
     }
 
     public function show(Request $request, Portal $portal, SubscriptionService $subs, ActivityMonitor $monitor)
@@ -93,7 +93,7 @@ class PortalController extends Controller
             $data['ranges'] = ActivityMonitor::RANGES;
         }
 
-        return Inertia::render('Admin/Portals/Show', $data);
+        return Inertia::render('LegacyPage', ['html' => view('admin.portals.show', $data)->render()]);
     }
 
     public function update(Request $request, Portal $portal)

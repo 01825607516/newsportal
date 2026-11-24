@@ -14,7 +14,7 @@ class AuthController extends Controller
     {
         return $request->session()->has('admin_id')
             ? redirect()->route('admin.dashboard')
-            : Inertia::render('Admin/Login');
+            : Inertia::render('LegacyPage', ['html' => view('admin.login')->render()]);
     }
 
     public function login(Request $request)

@@ -23,11 +23,11 @@ class ActivityController extends Controller
             ->orderByDesc('created_at')->orderByDesc('id')
             ->paginate(30)->withQueryString();
 
-        return Inertia::render('Admin/Activity/Index', [
+        return Inertia::render('LegacyPage', ['html' => view('admin.activity.index', [
             'logs' => $logs,
             'ranges' => ActivityMonitor::RANGES,
             'portals' => Portal::orderBy('portal_name')->limit(300)->get(['id', 'portal_name']),
             'flagged' => $monitor->flaggedPortals(),
-        ]);
+        ])->render()]);
     }
 }

@@ -32,7 +32,7 @@ class RequestController extends Controller
             });
         };
 
-        return Inertia::render('Admin/Requests/Index', [
+        return Inertia::render('LegacyPage', ['html' => view('admin.requests.index', [
             'q' => $q,
             'renewalStatus' => $renewalStatus,
             'graceStatus' => $graceStatus,
@@ -60,7 +60,7 @@ class RequestController extends Controller
                 ->latest('decided_at')
                 ->limit(20)
                 ->get(),
-        ]);
+        ])->render()]);
     }
 
     // ---------- Grace period ----------

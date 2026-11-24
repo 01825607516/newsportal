@@ -620,43 +620,32 @@
     @include('modules.news-entry')
 @endif
 
-{{-- "Categories" link in the sidebar: Home > Categories, right below "Project management" (same markup as the other sub-menu items). --}}
+{{-- Keep the Phoenix shell, replacing its demo navigation with the portal's own modules. --}}
 <script>
 (function () {
     var activeModule = @json($module ?? null);
-    var modules = [
-        { key: 'categories', label: 'Categories', href: @json(route('categories.index')) },
-        { key: 'news-entry', label: 'News Entry', href: @json(route('news.create')) }
-    ];
+    var dashboardUrl = @json(route('dashboard'));
+    var categoriesUrl = @json(route('categories.index'));
+    var newsUrl = @json(route('news.create'));
 
     var place = function () {
-        var list = document.querySelector('#navbarVerticalNav #nv-home');
+        var list = document.querySelector('#navbarVerticalNav');
         if (!list) return false;
-        var after = null;
-        list.querySelectorAll(':scope > li.nav-item').forEach(function (item) {
-            var t = item.querySelector('.nav-link-text');
-            if (t && t.textContent.trim() === 'Project management') after = item;
-        });
-        if (!after) return false;
+        var categoryActive = activeModule === 'categories';
+        var newsActive = activeModule === 'news-entry';
+        list.innerHTML =
+            '<li class="nav-item"><div class="nav-item-wrapper"><a class="nav-link' + (!activeModule ? ' active' : '') + '" href="' + dashboardUrl + '">' +
+                '<div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="pie-chart"></span></span><span class="nav-link-text">Dashboard</span></div></a></div></li>' +
+            '<li class="nav-item"><p class="navbar-vertical-label">Modules</p><hr class="navbar-vertical-line">' +
+                '<div class="nav-item-wrapper"><a class="nav-link dropdown-indicator' + (categoryActive ? ' active' : '') + '" href="#portal-basic-setup" role="button" data-bs-toggle="collapse" aria-expanded="' + categoryActive + '" aria-controls="portal-basic-setup">' +
+                    '<div class="d-flex align-items-center"><div class="dropdown-indicator-icon-wrapper"><span class="fas fa-caret-right dropdown-indicator-icon"></span></div><span class="nav-link-icon"><span data-feather="settings"></span></span><span class="nav-link-text">Basic Setup</span></div></a>' +
+                    '<div class="parent-wrapper label-1"><ul class="nav collapse parent' + (categoryActive ? ' show' : '') + '" data-bs-parent="#navbarVerticalCollapse" id="portal-basic-setup"><li class="collapsed-nav-item-title d-none">Basic Setup</li>' +
+                        '<li class="nav-item"><a class="nav-link' + (categoryActive ? ' active' : '') + '" href="' + categoriesUrl + '"><div class="d-flex align-items-center"><span class="nav-link-text">Categories</span></div></a></li>' +
+                    '</ul></div></div>' +
+                '<div class="nav-item-wrapper"><a class="nav-link' + (newsActive ? ' active' : '') + '" href="' + newsUrl + '"><div class="d-flex align-items-center"><span class="nav-link-icon"><span data-feather="edit-3"></span></span><span class="nav-link-text">News Entry</span></div></a></div>' +
+            '</li>';
 
-        modules.forEach(function (item) {
-            if (list.querySelector('[data-portal-module="' + item.key + '"]')) return;
-            var li = document.createElement('li');
-            li.className = 'nav-item';
-            li.setAttribute('data-portal-module', item.key);
-            li.innerHTML = '<a class="nav-link' + (activeModule === item.key ? ' active' : '') + '" href="' + item.href + '">' +
-                '<div class="d-flex align-items-center"><span class="nav-link-text">' + item.label + '</span></div></a>';
-            after.parentNode.insertBefore(li, after.nextSibling);
-            after = li;
-        });
-
-        if (activeModule === 'categories' || activeModule === 'news-entry') {
-            // the dashboard link is no longer the current page
-            var activeItem = list.querySelector('[data-portal-module="' + activeModule + '"]');
-            document.querySelectorAll('#navbarVerticalNav a.nav-link.active').forEach(function (a) {
-                if (!activeItem || !activeItem.contains(a)) a.classList.remove('active');
-            });
-        }
+        if (window.feather) window.feather.replace();
         return true;
     };
 

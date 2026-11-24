@@ -93,7 +93,7 @@ class BillingController extends Controller
 
     public function packages()
     {
-        return Inertia::render('Admin/Packages/Index', ['packages' => Package::orderBy('is_trial', 'desc')->orderBy('price')->get()]);
+        return Inertia::render('LegacyPage', ['html' => view('admin.packages.index', ['packages' => Package::orderBy('is_trial', 'desc')->orderBy('price')->get()])->render()]);
     }
 
     public function storePackage(Request $request)

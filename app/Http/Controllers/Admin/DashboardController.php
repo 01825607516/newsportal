@@ -12,7 +12,7 @@ class DashboardController extends Controller
 {
     public function index(ActivityMonitor $monitor)
     {
-        return Inertia::render('Admin/Dashboard', [
+        return Inertia::render('LegacyPage', ['html' => view('admin.dashboard', [
             'stats' => [
                 'total' => Portal::count(),
                 'active' => Portal::where('status', 'active')->count(),
@@ -22,6 +22,6 @@ class DashboardController extends Controller
             'flagged' => $monitor->flaggedPortals(),
             'recentPortals' => Portal::latest()->limit(5)->get(),
             'recent' => PortalActivity::with('portal:id,portal_name')->orderByDesc('created_at')->orderByDesc('id')->limit(10)->get(),
-        ]);
+        ])->render()]);
     }
 }

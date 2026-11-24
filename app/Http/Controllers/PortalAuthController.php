@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 use Throwable;
 
 class PortalAuthController extends Controller
@@ -20,7 +21,7 @@ class PortalAuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return Inertia::render('Portal/Login');
+        return Inertia::render('LegacyPage', ['html' => view('portal.login')->render()]);
     }
 
     public function showSignup(Request $request)
@@ -29,7 +30,7 @@ class PortalAuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        return Inertia::render('Portal/Signup');
+        return Inertia::render('LegacyPage', ['html' => view('portal.signup')->render()]);
     }
 
     /**

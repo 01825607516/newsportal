@@ -22,6 +22,11 @@ class PortalBillingController extends Controller
 {
     public function dashboard(Request $request, SubscriptionService $subs)
     {
+        return $this->renderPortalPage($request, $subs);
+    }
+
+    public function renderPortalPage(Request $request, SubscriptionService $subs, array $extra = [])
+    {
         /** @var Portal $portal */
         $portal = $request->attributes->get('portal');
 
@@ -31,10 +36,11 @@ class PortalBillingController extends Controller
             ->latest('started_at')
             ->first();
 
-        return Inertia::render('Portal/Dashboard', [
+        return Inertia::render('LegacyPage', ['html' => view('dashboard', [
             'billing' => $this->panel($portal, $subs),
             'activeSupportSession' => $activeSupportSession,
-        ]);
+            ...$extra,
+        ])->render()]);
     }
 
     public function renderAdminSupportDashboard(
@@ -46,7 +52,7 @@ class PortalBillingController extends Controller
         TenantManager::connect($portal);
         $billing = $this->panel($portal, $subs);
 
-        return Inertia::render('Portal/Dashboard', [
+        return Inertia::render('LegacyPage', ['html' => view('dashboard', [
             'billing' => $billing,
             'currentPortal' => $portal,
             'subscriptionInfo' => $billing['info'],
@@ -54,7 +60,7 @@ class PortalBillingController extends Controller
             'supportAdmin' => $admin,
             'adminSupportSession' => $supportSession,
             'activeSupportSession' => null,
-        ]);
+        ])->render()]);
     }
 
     public function requestGrace(Request $request, SubscriptionService $subs)

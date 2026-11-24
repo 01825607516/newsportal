@@ -8,21 +8,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Inertia\Inertia;
+use App\Services\SubscriptionService;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class NewsEntryController extends Controller
 {
-    public function create()
+    public function create(Request $request, SubscriptionService $subs, PortalBillingController $billing)
     {
         $types = DB::connection('tenant')->table('news_type_info')->where('type_status', 1)
             ->orderBy('news_type_id')->get(['news_type_id', 'type_name']);
 
-        return Inertia::render('Portal/Module', [
-            'module' => 'news-entry',
-            'html' => view('modules.news-entry', ['newsTypes' => $types])->render(),
-        ]);
+        return $billing->renderPortalPage($request, $subs, ['module' => 'news-entry', 'newsTypes' => $types]);
     }
 
     public function reporters(): JsonResponse
@@ -44,7 +41,7 @@ class NewsEntryController extends Controller
             'news_status' => ['required', 'integer'], 'news_type' => ['required', 'integer'],
             'headline_tag' => ['nullable', 'string', 'max:100'], 'news_headline' => ['required', 'string', 'max:250'],
             'news_sub_headline' => ['nullable', 'string', 'max:400'], 'news_details_brief' => ['nullable', 'string', 'max:400'],
-            'sections' => ['required', 'array', 'min:1', 'max:30'], 'sections.*.media_type' => ['required', 'in:1,2'],
+            'sections' => ['required', 'array', 'min:1'], 'sections.*.media_type' => ['required', 'in:1,2'],
             'sections.*.text' => ['nullable', 'string'], 'sections.*.caption' => ['nullable', 'string', 'max:300'],
             'sections.*.image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
             'sections.*.video_link' => ['nullable', 'url:http,https', 'max:255'], 'sections.*.is_cover' => ['nullable', 'boolean'],
